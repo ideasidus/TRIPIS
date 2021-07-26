@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, ButtonGroup, Divider, Grid, List, ListItem, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@material-ui/core'
+import { Button, ButtonGroup, Divider, Grid, List, ListItem, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableBody, TableRow, TableCell, TableContainer, TableSortLabel } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles';
 import { Rating } from '@material-ui/lab'
 
@@ -55,6 +55,9 @@ const Map = (props) => {
     const [tasteRating, setTasteRating] = useState(5);
     const [distanceRating, setDistanceRating] = useState(5);
     const [overallRating, setOverallRating] = useState(5);
+
+    const [order, setOrder] = useState('asc');
+    const [orderBy, setOrderBy] = useState('index');
 
 
     const createMarker = (place, index) => {
@@ -144,6 +147,38 @@ const Map = (props) => {
         setDialog(() => false)
     }
 
+    const handleRequestSort = (event, property) => {
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+    }
+
+    const stableSort = (array, comparator) => {
+        const stabilizedThis = array.map((el, index) => [el, index]);
+        stabilizedThis.sort((a, b) => {
+            const order = comparator(a[0], b[0]);
+            if (order !== 0) return order;
+            return a[1] - b[1];
+        });
+        return stabilizedThis.map((el) => el[0])
+    }
+
+    const getComparator = (order, orderBy) => {
+        return order === 'desc'
+            ? (a, b) => descendingComparator(a, b, orderBy)
+            : (a, b) => -descendingComparator(a, b, orderBy);
+    }
+
+    const descendingComparator = (a, b, orderBy) => {
+        if (b[orderBy] < a[orderBy]) {
+            return -1;
+        }
+        if (b[orderBy] > a[orderBy]) {
+            return 1;
+        }
+        return 0;
+    }
+
 
 
     useEffect(() => {
@@ -183,7 +218,7 @@ const Map = (props) => {
                     <Button>Event</Button>
                 </ButtonGroup>
                 <Divider />
-                <List>
+                {/* <List>
                     {results !== null && results.map((item, index) => {
                         return <><LocationItem
                             key={index}
@@ -196,7 +231,30 @@ const Map = (props) => {
                         // selected={item.selected}
                         /><Divider /></>
                     })}
-                </List>
+                </List> */}
+                <TableContainer>
+                    <Table>
+                        <SortTableHead
+                            order={order}
+                            orderBy={orderBy}
+                            onRequestSort={handleRequestSort}
+                        />
+                        <TableBody>
+                            {results !== null && stableSort(results, getComparator(order, orderBy)).map((item, index) => {
+                                return <LocationItem
+                                    key={index}
+                                    click={(e) => clickHandler(index, item)}
+                                    {...item}
+                                    index={numToSSColumn(index + 1)}
+                                    name={item.name}
+                                    vicinity={item.vicinity}
+                                    rating={item.rating}
+                                    selected={item.selected}
+                                />
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
                 <div class="results">
                 </div>
@@ -251,7 +309,7 @@ const Map = (props) => {
                     </TableContainer>
                 </DialogContent>
 
-                <DialogActions style={{justifyContent: 'center'}}>
+                <DialogActions style={{ justifyContent: 'center' }}>
                     <Button>Submit</Button>
                 </DialogActions>
             </Dialog>
@@ -261,22 +319,76 @@ const Map = (props) => {
     );
 };
 
+const SortTableHead = (props) => {
+
+    const { orderBy, order, onRequestSort } = props;
+
+    const headCells = [
+        { id: 'index', label: 'index' },
+        { id: 'name', label: 'name' },
+        { id: 'rating', label: 'rating' },
+        { id: 'vicinty', label: 'vicinty' },
+    ]
+
+    const createSortHandler = (property) => (event) => {
+        onRequestSort(event, property)
+    }
+
+    return (
+        <TableHead>
+            <TableRow>
+                {headCells.map((headCell) => (
+                    <TableCell sortDirection={orderBy === headCell.id ? order : false}>
+                        <TableSortLabel
+                            active={orderBy === headCell.id}
+                            direction={orderBy === headCell.id ? order : 'asc'}
+                            onClick={createSortHandler(headCell.id)}
+                        >
+                            {headCell.label}
+                            {/* {orderBy === headCell.id ? (
+                                <span className={classes.visuallyHidden}>
+                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                </span>
+                            ) : null} */}
+                        </TableSortLabel>
+                    </TableCell>
+                ))}
+            </TableRow>
+        </TableHead>
+    )
+
+}
+
 const LocationItem = (props) => {
 
     return (
-        <ListItem onClick={props.click} style={{ backgroundColor: props.selected ? '#252525' : '#ffffff' }}>
-            <div style={{ width: '100%' }}>
+        // <ListItem onClick={props.click} style={{ backgroundColor: props.selected ? '#252525' : '#ffffff' }}>
+        //     <div style={{ width: '100%' }}>
+        //         {props.index}
+        //         {props.name}
+        //         {props.type}
+        //     </div>
+        //     <div>
+        //         {props.rating} <Rating name="read-only" value={props.rating} readOnly />
+        //     </div>
+        //     <div>
+        //         {props.vicinity}
+        //     </div>
+        // </ListItem>
+        <TableRow onClick={props.click} style={{ backgroundColor: props.selected ? '#252525' : '#ffffff' }}>
+            <TableCell>
                 {props.index}
+            </TableCell>
+            <TableCell>
                 {props.name}
-                {props.type}
-            </div>
-            <div>
+            </TableCell>
+            <TableCell>
                 {props.rating} <Rating name="read-only" value={props.rating} readOnly />
-            </div>
-            <div>
+            </TableCell>
+            <TableCell>
                 {props.vicinity}
-            </div>
-        </ListItem>
+            </TableCell>
+        </TableRow>
     )
 }
 
