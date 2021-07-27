@@ -13,7 +13,7 @@ import SearchInput from "./searchInput";
 
 /* eslint-disable no-undef */
 
-const center = { lat: 35.886058, lng: 128.611335 };
+const center = { lat: 40.7483475, lng: -73.9864422 };
 
 const useStyles = makeStyles((theme) => ({
     // root: {
