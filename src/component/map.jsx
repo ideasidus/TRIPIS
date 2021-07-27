@@ -13,7 +13,7 @@ import SearchInput from "./searchInput";
 
 /* eslint-disable no-undef */
 
-const center = { lat: 35.886058, lng: 128.611335 };
+const center = { lat: 40.7483475, lng: -73.9864422 };
 
 const useStyles = makeStyles((theme) => ({
     // root: {
@@ -120,8 +120,8 @@ const Map = (props) => {
 
             setResults((prev) => results.map((item) => (
                 item.rating
-                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
-                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
+                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
             )));
         })
     }
