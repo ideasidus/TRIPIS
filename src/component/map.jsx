@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, ButtonGroup, Divider, Grid, List, ListItem, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableBody, TableRow, TableCell, TableContainer, TableSortLabel } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles';
 import { Rating } from '@material-ui/lab'
+import haversine from 'haversine-distance'
 
 import GoogleMapReact from "google-map-react";
 import axios from "axios";
@@ -116,13 +117,13 @@ const Map = (props) => {
                 }
 
             }
+
+            console.log( haversine([results[0].geometry.location.lat(), results[0].geometry.location.lng()], [center.lat, center.lng]))
             setResults((prev) => results.map((item) => (
                 item.rating
-                    ? Object.assign(item, { selected: false })
-                    : Object.assign(item, { selected: false, rating : 0 })
+                    ? Object.assign(item, { selected: false, distance : Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
+                    : Object.assign(item, { selected: false, rating : 0, distance : Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
             )));
-
-            
         })
     }
 
@@ -181,11 +182,7 @@ const Map = (props) => {
 
             markers[el[1]].setLabel(numToSSColumn(index + 1))
             return el[0]
-        }
-            
-            
-            
-        )
+        })
     }
 
     const getComparator = (order, orderBy) => {
@@ -274,6 +271,7 @@ const Map = (props) => {
                                     name={item.name}
                                     vicinity={item.vicinity}
                                     rating={item.rating ? item.rating : 0}
+                                    distance={item.distance}
                                     selected={item.selected}
                                 />
                             })}
@@ -350,9 +348,9 @@ const SortTableHead = (props) => {
 
     const headCells = [
         { id: 'index', label: 'index', sort: false },
-        { id: 'name', label: 'name', sort: true },
+        { id: 'name', label: 'name', sort: false },
         { id: 'rating', label: 'rating', sort: true },
-        { id: 'vicinty', label: 'vicinty', sort: false },
+        { id: 'distance', label: 'distance', sort: true },
     ]
 
     const createSortHandler = (property) => (event) => {
@@ -411,7 +409,7 @@ const LocationItem = (props) => {
                 {props.rating != 0 ?  props.rating : '평가가 없습니다.'} <Rating name="read-only" value={props.rating} readOnly />
             </TableCell>
             <TableCell>
-                {props.vicinity}
+                {props.distance >= 1000 ? (props.distance)/1000 + 'km' : props.distance + 'm'}
             </TableCell>
         </TableRow>
     )

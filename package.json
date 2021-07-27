@@ -44,6 +44,7 @@
     "dotenv": "^10.0.0",
     "google-map-react": "^2.1.10",
     "google-maps": "^4.3.3",
+    "haversine-distance": "^1.2.1",
     "nodemon": "^2.0.12",
     "react-hook-google-maps": "0.0.3",
     "react-image-slider": "^0.1.0"
