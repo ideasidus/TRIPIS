@@ -2,6 +2,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,macos,react,web,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,macos,react,web,visualstudiocode
 
+#Enviroment Variables
+.env
+
 ### Linux ###
 *~
 
