@@ -48,6 +48,7 @@ const Map = (props) => {
     //   const mapEl = document.getElementById('map');
 
     const [results, setResults] = useState([]);
+    const [markers, setMarkers] = useState([]);
     const [mapState, setMapState] = useState(null);
     const [openDetail, setOpenDetail] = useState(false);
 
@@ -100,10 +101,15 @@ const Map = (props) => {
 
         service.nearbySearch(request, (results, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                let tAllMarkers = [];
                 for (let i = 0; i < results.length; i++) {
-                    createMarker(results[i], i);
-
+                    var marker = createMarker(results[i], i);
+                    tAllMarkers.push(marker);
                 }
+
+                console.log('in nearBy', tAllMarkers)
+                setMarkers((prev) => tAllMarkers);
+
 
                 if (results[0].geometry != null && results[0].geometry.location != null) {
                     map.setCenter(results[0].geometry.location);
@@ -115,16 +121,12 @@ const Map = (props) => {
                     ? Object.assign(item, { selected: false })
                     : Object.assign(item, { selected: false, rating : 0 })
             )));
+
+            
         })
     }
 
     const clickHandler = (index, place) => {
-        // console.log(place)
-        // console.log(place.geometry)
-        // console.log(place.geometry.location.lat())
-        // console.log(map.panTo({lat: place.geometry.location.lat() , lng: place.geometry.location.lng()}))
-        // if (!place.geometry || !place.geometry.location) return;
-        // map.panTo(place.geometry.location)
 
         console.log(index, place.place_id, place.name)
 
@@ -160,13 +162,30 @@ const Map = (props) => {
     }
 
     const stableSort = (array, comparator) => {
-        const stabilizedThis = array.map((el, index) => [el, index]);
+        // const originIndex = [];
+        const stabilizedThis = array.map((el, index) => {
+            // originIndex.push(index)
+            return [el, index]
+        });
+        
         stabilizedThis.sort((a, b) => {
             const order = comparator(a[0], b[0]);
             if (order !== 0) return order;
             return a[1] - b[1];
         });
-        return stabilizedThis.map((el) => el[0])
+
+        console.log('in stableSort ', stabilizedThis)
+        console.log('now all marker', markers)
+
+        return stabilizedThis.map((el, index) => {
+
+            markers[el[1]].setLabel(numToSSColumn(index + 1))
+            return el[0]
+        }
+            
+            
+            
+        )
     }
 
     const getComparator = (order, orderBy) => {
@@ -389,7 +408,7 @@ const LocationItem = (props) => {
                 {props.name}
             </TableCell>
             <TableCell>
-                {props.rating} <Rating name="read-only" value={props.rating} readOnly />
+                {props.rating != 0 ?  props.rating : '평가가 없습니다.'} <Rating name="read-only" value={props.rating} readOnly />
             </TableCell>
             <TableCell>
                 {props.vicinity}
