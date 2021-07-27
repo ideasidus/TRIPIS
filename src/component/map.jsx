@@ -110,7 +110,11 @@ const Map = (props) => {
                 }
 
             }
-            setResults((prev) => results.map((item) => Object.assign(item, { selected: false })));
+            setResults((prev) => results.map((item) => (
+                item.rating
+                    ? Object.assign(item, { selected: false })
+                    : Object.assign(item, { selected: false, rating : 0 })
+            )));
         })
     }
 
@@ -122,9 +126,11 @@ const Map = (props) => {
         // if (!place.geometry || !place.geometry.location) return;
         // map.panTo(place.geometry.location)
 
+        console.log(index, place.place_id, place.name)
+
         mapState.panTo(place.geometry.location)
         setResults((prev) => prev.map((v, i) => ({
-            ...v, selected: (i === index ? true : false)
+            ...v, selected: (v.place_id === place.place_id ? true : false)
         })))
     }
 
@@ -248,7 +254,7 @@ const Map = (props) => {
                                     index={numToSSColumn(index + 1)}
                                     name={item.name}
                                     vicinity={item.vicinity}
-                                    rating={item.rating}
+                                    rating={item.rating ? item.rating : 0}
                                     selected={item.selected}
                                 />
                             })}
@@ -324,10 +330,10 @@ const SortTableHead = (props) => {
     const { orderBy, order, onRequestSort } = props;
 
     const headCells = [
-        { id: 'index', label: 'index' },
-        { id: 'name', label: 'name' },
-        { id: 'rating', label: 'rating' },
-        { id: 'vicinty', label: 'vicinty' },
+        { id: 'index', label: 'index', sort: false },
+        { id: 'name', label: 'name', sort: true },
+        { id: 'rating', label: 'rating', sort: true },
+        { id: 'vicinty', label: 'vicinty', sort: false },
     ]
 
     const createSortHandler = (property) => (event) => {
@@ -338,7 +344,7 @@ const SortTableHead = (props) => {
         <TableHead>
             <TableRow>
                 {headCells.map((headCell) => (
-                    <TableCell sortDirection={orderBy === headCell.id ? order : false}>
+                    (headCell.sort ? <TableCell sortDirection={orderBy === headCell.id ? order : false}>
                         <TableSortLabel
                             active={orderBy === headCell.id}
                             direction={orderBy === headCell.id ? order : 'asc'}
@@ -351,7 +357,7 @@ const SortTableHead = (props) => {
                                 </span>
                             ) : null} */}
                         </TableSortLabel>
-                    </TableCell>
+                    </TableCell> : <TableCell> {headCell.label} </TableCell>)
                 ))}
             </TableRow>
         </TableHead>
