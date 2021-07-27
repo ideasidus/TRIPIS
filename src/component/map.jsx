@@ -118,11 +118,12 @@ const Map = (props) => {
 
             }
 
-            console.log( haversine([results[0].geometry.location.lat(), results[0].geometry.location.lng()], [center.lat, center.lng]))
             setResults((prev) => results.map((item) => (
                 item.rating
-                    ? Object.assign(item, { selected: false, distance : Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
-                    : Object.assign(item, { selected: false, rating : 0, distance : Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
+                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                    // ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
+                    // : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lat(), item.geometry.location.lng()], [center.lat, center.lng])) })
             )));
         })
     }
@@ -168,7 +169,7 @@ const Map = (props) => {
             // originIndex.push(index)
             return [el, index]
         });
-        
+
         stabilizedThis.sort((a, b) => {
             const order = comparator(a[0], b[0]);
             if (order !== 0) return order;
@@ -213,7 +214,25 @@ const Map = (props) => {
             service = new google.maps.places.PlacesService(map);
             location = new google.maps.LatLng(center.lat, center.lng)
             infowindow = new google.maps.InfoWindow();
+
+            console.log(center.lat, center.lng)
+
+            const svgMarker = {
+                path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
+                fillColor: "blue",
+                fillOpacity: 0.6,
+                strokeWeight: 0,
+                rotation: 0,
+                scale: 2,
+                anchor: new google.maps.Point(15, 30),
+            };
+            new google.maps.Marker({
+                position: { lat: center.lat, lng: center.lng },
+                icon: svgMarker,
+                map: map,
+            });
         }
+
         init()
         // console.log(typeof map)
         // setMapState((prev) => map)
@@ -406,10 +425,10 @@ const LocationItem = (props) => {
                 {props.name}
             </TableCell>
             <TableCell>
-                {props.rating != 0 ?  props.rating : '평가가 없습니다.'} <Rating name="read-only" value={props.rating} readOnly />
+                {props.rating != 0 ? props.rating : '평가가 없습니다.'} <Rating name="read-only" value={props.rating} readOnly />
             </TableCell>
             <TableCell>
-                {props.distance >= 1000 ? (props.distance)/1000 + 'km' : props.distance + 'm'}
+                {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
             </TableCell>
         </TableRow>
     )
