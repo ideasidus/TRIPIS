@@ -24,7 +24,38 @@ const useStyles = makeStyles((theme) => ({
     //         margin: theme.spacing(1),
     //     },
     // },
+    root: {
+        display: 'flex',
+        background: 'white',
+    },
 
+    leftMenu: {
+        width: '20vw',
+        minWidth: 400,
+        height: '100vh',
+        overflowY: 'auto' 
+    },
+
+    buttonGroup: {
+        color: 'green',
+        // borderColor: 'white',
+        // background: 'black',
+    },
+
+    leftMenuTable: {
+        // backgroundColor: props.selected ? '#252525' : '#ffffff',
+    },
+
+    map: {
+        height: '100vh', 
+    },
+    
+    detailItem: {
+        height: '100vh',
+        width: '20vw', 
+        minWidth: 400,
+    },
+    
     locationItem: {
 
     },
@@ -47,6 +78,7 @@ const Map = (props) => {
     //   const mapOptions = CONFIGURATION.mapOptions;
 
     //   const mapEl = document.getElementById('map');
+    const classes = useStyles();
 
     const [results, setResults] = useState([]);
     const [markers, setMarkers] = useState([]);
@@ -248,13 +280,14 @@ const Map = (props) => {
     }, [results])
 
     return (
-        <div style={{ display: 'flex' }}>
+        // <div style={{ display: 'flex' }}>
+        <div className={classes.root}>
 
-            <div style={{ width: '20vw', minWidth: 400, height: '100vh', overflowY: 'auto' }}>
-                <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">
-                    <Button onClick={getRestaurant}>Restaurant</Button>
-                    <Button>Attraction</Button>
-                    <Button>Event</Button>
+            <div className={classes.leftMenu}>
+                <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
+                    <Button color="inherit" onClick={getRestaurant}>Restaurant</Button>
+                    <Button color="inherit">Attraction</Button>
+                    <Button color="inherit">Event</Button>
                 </ButtonGroup>
                 <Divider />
                 {/* <List>
@@ -299,11 +332,11 @@ const Map = (props) => {
                 <div class="results">
                 </div>
             </div>
-            <div id="map" className="map" style={{ height: '100vh', width: (openDetail ? '60vw' : '80vw') }}>
+            <div id="map" className={classes.map} style={{ width: (openDetail ? '60vw' : '80vw') }}>
                 test
             </div>
 
-            <div style={{ height: '100vh', width: '20vw', minWidth: 400, display: (!openDetail ? 'none' : '') }}>
+            <div className={classes.detailItem} style={{ display: (!openDetail ? 'none' : '') }}>
                 <DetailItem
                     name="피자에땅 경대점"
                     address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
@@ -400,9 +433,9 @@ const SortTableHead = (props) => {
 }
 
 const LocationItem = (props) => {
-
+    const classes = useStyles();
     return (
-        // <ListItem onClick={props.click} style={{ backgroundColor: props.selected ? '#252525' : '#ffffff' }}>
+        // <ListItem onClick={props.click} style={{ backgroundColor: props.selected ? '#808080' : '#ffffff' }}>
         //     <div style={{ width: '100%' }}>
         //         {props.index}
         //         {props.name}
@@ -415,7 +448,8 @@ const LocationItem = (props) => {
         //         {props.vicinity}
         //     </div>
         // </ListItem>
-        <TableRow onClick={props.click} style={{ backgroundColor: props.selected ? '#252525' : '#ffffff' }}>
+        // <TableRow onClick={props.click} className={classes.leftMenuTable}>
+        <TableRow onClick={props.click} style={{backgroundColor: props.selected ? '#808080' : '#ffffff'}}>
             <TableCell>
                 {props.index}
             </TableCell>
