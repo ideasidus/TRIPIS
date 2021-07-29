@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     leftMenu: {
-        width: '20vw',
+        width: '25vw',
         minWidth: 400,
         height: '100vh',
         overflowY: 'auto' 
@@ -42,18 +42,12 @@ const useStyles = makeStyles((theme) => ({
     
     mapOpened: {
         height: '100vh',
-        width: '60vw',
+        width: '55vw',
     },
 
     mapNotOpened: {
         height: '100vh',
-        width: '80vw',
-    },
-
-    detailItem: {
-        height: '100vh',
-        width: '20vw', 
-        minWidth: 400,
+        width: '75vw',
     },
 
     detailItemOpened: {
@@ -81,6 +75,10 @@ const useStyles = makeStyles((theme) => ({
     rateDialog: {
         justifyContent: 'center',
     },
+
+    tableTextAlign: {
+        textAlign: 'center'
+    }
 }));
 
 
@@ -417,6 +415,7 @@ const Map = (props) => {
 const SortTableHead = (props) => {
 
     const { orderBy, order, onRequestSort } = props;
+    const classes = useStyles();
 
     const headCells = [
         { id: 'index', label: 'index', sort: false },
@@ -433,7 +432,7 @@ const SortTableHead = (props) => {
         <TableHead>
             <TableRow>
                 {headCells.map((headCell) => (
-                    (headCell.sort ? <TableCell sortDirection={orderBy === headCell.id ? order : false}>
+                    (headCell.sort ? <TableCell sortDirection={orderBy === headCell.id ? order : false} className={classes.tableTextAlign}>
                         <TableSortLabel
                             active={orderBy === headCell.id}
                             direction={orderBy === headCell.id ? order : 'asc'}
@@ -446,8 +445,9 @@ const SortTableHead = (props) => {
                                 </span>
                             ) : null} */}
                         </TableSortLabel>
-                    </TableCell> : <TableCell> {headCell.label} </TableCell>)
+                    </TableCell> : <TableCell className={classes.tableTextAlign}> { headCell.label }</TableCell>)
                 ))}
+
             </TableRow>
         </TableHead>
     )
@@ -472,16 +472,16 @@ const LocationItem = (props) => {
         // </ListItem>
         // <TableRow onClick={props.click} style={{backgroundColor: props.selected ? '#808080' : '#ffffff'}}>
         <TableRow onClick={props.click} className={props.selected ? classes.tableSelected : classes.tableNotSelected}>
-            <TableCell>
+            <TableCell className={classes.tableTextAlign} >
                 {props.index}
             </TableCell>
             <TableCell>
                 {props.name}
             </TableCell>
-            <TableCell>
+            <TableCell className={classes.tableTextAlign} >
                 {props.rating != 0 ? props.rating : 'Not Rated Yet'} <Rating name="read-only" value={props.rating} readOnly />
             </TableCell>
-            <TableCell>
+            <TableCell className={classes.tableTextAlign} >
                 {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
             </TableCell>
         </TableRow>
