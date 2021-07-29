@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { Fragment, Button } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { SnackbarProvider, useSnackbar } from 'notistack';
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <SnackbarProvider
+      makSnack={3}
+    >
+      <App />
+    </SnackbarProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

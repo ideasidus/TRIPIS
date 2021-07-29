@@ -1,15 +1,17 @@
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import ClearIcon from '@material-ui/icons/Clear';
 import SearchIcon from '@material-ui/icons/Search';
 
+import { useSnackbar } from 'notistack';
+
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, IconButton, Divider, InputBase } from '@material-ui/core';
+import { Paper, IconButton, Divider, InputBase, Button } from '@material-ui/core';
 import { useEffect } from 'react';
 
 const useStyles = makeStyles((theme) => ({
     inputSection: {
         width: '20vw', minWidth: 400, height: '100vh', overflowY: 'auto',
-        
+
     },
     inputPaper: {
         display: 'flex', alignItems: 'center',
@@ -35,20 +37,31 @@ const getCenter = () => {
     // Select DB8 Code
 
     return null
-    return { lat: 35.8692386, lng: 128.5919156}
+    return { lat: 35.8692386, lng: 128.5919156 }
 }
 
 const AdminMap = (props) => {
     let map, service, location, infowindow, geocoder, searchBox;
     const classes = useStyles()
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
     const [input, setInput] = useState('');
     const [markers, setMarkers] = useState([]);
     const [center, setCenter] = useState(getCenter())
+    const [result, setResults] = useState([]);
 
 
     const handleClear = () => {
         setInput('')
     }
+
+    const action = key => (
+        <Fragment>
+            <Button onClick={() => { closeSnackbar(key) }}>
+                'Dismiss'
+            </Button>
+        </Fragment>
+    );
 
 
     const handleInputChange = (e) => {
@@ -68,7 +81,7 @@ const AdminMap = (props) => {
         };
 
         const marker = new google.maps.Marker({
-            position: { lat: lat, lng: lng},
+            position: { lat: lat, lng: lng },
             icon: svgMarker,
             map: map,
         })
@@ -93,7 +106,7 @@ const AdminMap = (props) => {
 
         let btn = document.createElement('button');
         btn.innerText = '숙소로 등록하기'
-        btn.addEventListener('click', function() { setCenterPlace(place); })
+        btn.addEventListener('click', function () { setCenterPlace(place); })
         content.appendChild(btn)
 
         infowindow.setContent(content);
@@ -104,12 +117,13 @@ const AdminMap = (props) => {
         console.log('setCenter', place)
         // set db
         setCenter({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() })
+        enqueueSnackbar('Set Center!!', { variant: 'success', autoHideDuration: 2000, action })
     }
 
     const initMap = () => {
         if (center !== null) {
             map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: center.lat, lng: center.lng},
+                center: { lat: center.lat, lng: center.lng },
                 zoom: 15,
             })
 
@@ -126,7 +140,7 @@ const AdminMap = (props) => {
         } else {
             console.log('center is null')
             map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: defaultCenter.lat, lng: defaultCenter.lng},
+                center: { lat: defaultCenter.lat, lng: defaultCenter.lng },
                 zoom: 15,
             })
 
@@ -263,13 +277,13 @@ const AdminMap = (props) => {
     //         if (!query) {
     //             return;
     //         }
-    
+
     //         const handleResult = (geocodeResult) => {
     //             return;
     //         }
-    
+
     //         console.log(map)
-    
+
     //         // const request = {address: "Hell's Kitchen, 맨해튼 뉴욕 미국", bounds: map.getBounds()};
     //         const request = {address: query, bounds: map.getBounds()};
     //         geocoder.geocode(request, (results, status) => {
@@ -305,7 +319,7 @@ const AdminMap = (props) => {
     }, [center])
 
     return (
-        <div style={{display: 'flex'}}>
+        <div style={{ display: 'flex' }}>
             <div className={classes.inputSection}>
                 <Paper className={classes.inputPaper}>
                     {/* <input
@@ -314,10 +328,10 @@ const AdminMap = (props) => {
                     /> */}
                     <InputBase
                         id='input'
-                        className={classes.input}   
+                        className={classes.input}
                         placeholder="Search Google Maps"
-                        // value={input}
-                        // onChange={handleInputChange}
+                    // value={input}
+                    // onChange={handleInputChange}
                     />
                     <IconButton onClick={handleClear} className={classes.iconButton}>
                         <ClearIcon />
