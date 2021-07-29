@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@material-ui/core": "^4.12.2",
+    "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@types/google-maps": "^3.2.3",
     "@ubilabs/google-maps-react-hooks": "^1.5.0",
@@ -47,6 +48,7 @@
     "haversine-distance": "^1.2.1",
     "nodemon": "^2.0.12",
     "react-hook-google-maps": "0.0.3",
-    "react-image-slider": "^0.1.0"
+    "react-image-slider": "^0.1.0",
+    "react-router-dom": "^5.2.0"
   }
 }
