@@ -38,26 +38,48 @@ const useStyles = makeStyles((theme) => ({
 
     buttonGroup: {
         color: 'green',
-        // borderColor: 'white',
-        // background: 'black',
-    },
-
-    leftMenuTable: {
-        // backgroundColor: props.selected ? '#252525' : '#ffffff',
-    },
-
-    map: {
-        height: '100vh', 
     },
     
+    mapOpened: {
+        height: '100vh',
+        width: '60vw',
+    },
+
+    mapNotOpened: {
+        height: '100vh',
+        width: '80vw',
+    },
+
     detailItem: {
         height: '100vh',
         width: '20vw', 
         minWidth: 400,
     },
-    
-    locationItem: {
 
+    detailItemOpened: {
+        height: '100vh',
+        width: '20vw',
+        minWidth: 400,
+        display: '',
+    },
+
+    detailItemNotOpened: {
+        height: '100vh',
+        width: '20vw',
+        minWidth: 400,
+        display: 'none',
+    },
+
+    tableSelected: {
+        backgroundColor: '#808080',
+    },
+
+    tableNotSelected: {
+        backgroundColor: '#ffffff',
+    },
+
+    rateDialog: {
+        justifyContent: 'center',
     },
 }));
 
@@ -332,11 +354,11 @@ const Map = (props) => {
                 <div class="results">
                 </div>
             </div>
-            <div id="map" className={classes.map} style={{ width: (openDetail ? '60vw' : '80vw') }}>
+            <div id="map" className={openDetail ? classes.mapOpened : classes.mapNotOpened}>
                 test
             </div>
 
-            <div className={classes.detailItem} style={{ display: (!openDetail ? 'none' : '') }}>
+            <div className={openDetail ? classes.detailItemOpened : classes.detailItemNotOpened}>
                 <DetailItem
                     name="피자에땅 경대점"
                     address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
@@ -382,7 +404,7 @@ const Map = (props) => {
                     </TableContainer>
                 </DialogContent>
 
-                <DialogActions style={{ justifyContent: 'center' }}>
+                <DialogActions className={classes.rateDialog}>
                     <Button>Submit</Button>
                 </DialogActions>
             </Dialog>
@@ -448,8 +470,8 @@ const LocationItem = (props) => {
         //         {props.vicinity}
         //     </div>
         // </ListItem>
-        // <TableRow onClick={props.click} className={classes.leftMenuTable}>
-        <TableRow onClick={props.click} style={{backgroundColor: props.selected ? '#808080' : '#ffffff'}}>
+        // <TableRow onClick={props.click} style={{backgroundColor: props.selected ? '#808080' : '#ffffff'}}>
+        <TableRow onClick={props.click} className={props.selected ? classes.tableSelected : classes.tableNotSelected}>
             <TableCell>
                 {props.index}
             </TableCell>
@@ -457,7 +479,7 @@ const LocationItem = (props) => {
                 {props.name}
             </TableCell>
             <TableCell>
-                {props.rating != 0 ? props.rating : '평가가 없습니다.'} <Rating name="read-only" value={props.rating} readOnly />
+                {props.rating != 0 ? props.rating : 'Not Rated Yet'} <Rating name="read-only" value={props.rating} readOnly />
             </TableCell>
             <TableCell>
                 {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
