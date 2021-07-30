@@ -367,7 +367,8 @@ const Map = (props) => {
                     total_rate={4.2}
                     distance_rate={5}
                     taste_rate={3.4}
-                    clickRate={() => dialogOpen()}
+                    btnName='Rate'
+                    clickBtn={() => dialogOpen()}
                 />
             </div>
 
@@ -567,8 +568,8 @@ const DetailItem = (props) => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button onClick={() => props.clickRate()}>
-                RATE
+            <Button onClick={() => props.clickBtn()}>
+                {props.btnName}
             </Button>
         </>
 
@@ -576,3 +577,4 @@ const DetailItem = (props) => {
 }
 
 export default Map;
+export {DetailItem}
