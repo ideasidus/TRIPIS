@@ -152,7 +152,8 @@ const Map = (props) => {
         const request = {
             location: location,
             radius: 1000,
-            type: 'restaurant'
+            type: 'restaurant',
+            language: 'en'
         };
 
         service.nearbySearch(request, (results, status) => {
@@ -191,7 +192,7 @@ const Map = (props) => {
         // })))
         setResults((prev) => prev.map((v, i) => {
             if (v.place_id === place.place_id) {
-                setSelectedIndex(index)
+                setSelectedIndex(i)
                 return {
                     ...v, selected : true
                 }
@@ -534,6 +535,7 @@ const LocationItem = (props) => {
 
 
 const DetailItem = (props) => {
+    const classes = useStyles();
     console.log(props)
     return (
         <>
@@ -541,7 +543,7 @@ const DetailItem = (props) => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>
+                            <TableCell style={{width: 130}}>
                                 Kind
                             </TableCell>
                             <TableCell>
@@ -564,7 +566,8 @@ const DetailItem = (props) => {
                                 ADDRESS
                             </TableCell>
                             <TableCell>
-                                {props.address}
+                                {/* {props.address} */}
+                                {props.vicinity}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -580,7 +583,7 @@ const DetailItem = (props) => {
                                 DISTANCE
                             </TableCell>
                             <TableCell>
-                                {props.distance}
+                                {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -588,7 +591,8 @@ const DetailItem = (props) => {
                                 TOTAL<br />RATE
                             </TableCell>
                             <TableCell>
-                                {props.total_rate}
+                                {/* {props.total_rate} */}
+                                {props.rating}
                             </TableCell>
                         </TableRow>
                         <TableRow>
