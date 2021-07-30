@@ -109,6 +109,8 @@ const Map = (props) => {
     const [tasteRating, setTasteRating] = useState(5);
     const [distanceRating, setDistanceRating] = useState(5);
     const [overallRating, setOverallRating] = useState(5);
+    const [userName, setUserName] = useState('');
+    const [reviews, setReviews] = useState([]);
 
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('index');
@@ -312,6 +314,16 @@ const Map = (props) => {
         console.log('results change : ', results)
     }, [results])
 
+    const addReviews = () => {
+        setReviews(reviews.concat([{
+            index: selectedIndex,
+            username: userName,
+            tasteRating: tasteRating,
+            distanceRating: distanceRating,
+            overallRating: overallRating
+        }]));
+    }
+
     return (
         // <div style={{ display: 'flex' }}>
         <div className={classes.root}>
@@ -390,6 +402,8 @@ const Map = (props) => {
                     taste_rate='now on test'
                     {...results[selectedIndex]}
                     clickRate={() => dialogOpen()}
+                    reviews = {reviews}
+                    selectedIndex = {selectedIndex}
                 />)}
             </div>
 
@@ -404,6 +418,12 @@ const Map = (props) => {
                 <DialogContent>
                     <TableContainer>
                         <Table>
+                            <TableRow>
+                                <TableCell>Name : </TableCell>
+                                <TableCell>
+                                    <input type="text" value={userName} onChange={(e) => { setUserName(e.target.value) }}/>
+                                </TableCell>
+                            </TableRow>
                             <TableRow>
                                 <TableCell>Taste : </TableCell>
                                 <TableCell>
@@ -426,8 +446,8 @@ const Map = (props) => {
                     </TableContainer>
                 </DialogContent>
 
-                <DialogActions className={classes.rateDialog}>
-                    <Button>Submit</Button>
+                <DialogActions>
+                    <Button onClick={() => {console.log("리뷰"); addReviews(); dialogClose();}}>Submit</Button>
                 </DialogActions>
             </Dialog>
         </div>
@@ -587,7 +607,38 @@ const DetailItem = (props) => {
                                 {props.taste_rate}
                             </TableCell>
                         </TableRow>
-
+                    </TableBody>
+                </Table>
+                <br/>
+                💎Reviews
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>
+                                NickName
+                            </TableCell>
+                            <TableCell>
+                                Taste
+                            </TableCell>
+                            <TableCell>
+                                Distance
+                            </TableCell>
+                            <TableCell>
+                                Overall
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {props.reviews !== [] && props.reviews.map((item, index) => {
+                            if (item.index == props.selectedIndex) {
+                                return <ReviewItem
+                                username = {item.username}
+                                tasteRating = {item.tasteRating}
+                                distanceRating = {item.distanceRating}
+                                overallRating = {item.overallRating}
+                            />
+                            }
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -596,6 +647,26 @@ const DetailItem = (props) => {
             </Button>
         </>
 
+    )
+}
+
+const ReviewItem = (props) => {
+    const classes = useStyles();
+    return (
+        <TableRow>
+            <TableCell className={classes.tableTextAlign} >
+                {props.username}
+            </TableCell>
+            <TableCell className={classes.tableTextAlign}>
+                {props.tasteRating}
+            </TableCell>
+            <TableCell className={classes.tableTextAlign} >
+                {props.distanceRating}
+            </TableCell>
+            <TableCell className={classes.tableTextAlign} >
+                {props.overallRating}
+            </TableCell>
+        </TableRow>
     )
 }
 
