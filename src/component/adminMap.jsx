@@ -482,6 +482,7 @@ const AdminMap = (props) => {
                     taste_rate={3.4}
                     btnName='Recommend!'
                     clickBtn={() => dialogOpen()}
+                    reviews={[]}
                 />
             </div>
         </div>
