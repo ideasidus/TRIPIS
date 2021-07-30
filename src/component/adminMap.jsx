@@ -105,7 +105,7 @@ const AdminMap = (props) => {
         content.appendChild(name);
 
         let btn = document.createElement('button');
-        btn.innerText = '숙소로 등록하기'
+        btn.innerText = 'Register as accommodation'
         btn.addEventListener('click', function () { setCenterPlace(place); })
         content.appendChild(btn)
 

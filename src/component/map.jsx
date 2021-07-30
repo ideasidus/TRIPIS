@@ -113,6 +113,7 @@ const Map = (props) => {
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('index');
 
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
     const createMarker = (place, index) => {
         if (!place.geometry || !place.geometry.location) return;
@@ -183,9 +184,21 @@ const Map = (props) => {
         console.log(index, place.place_id, place.name)
 
         mapState.panTo(place.geometry.location)
-        setResults((prev) => prev.map((v, i) => ({
-            ...v, selected: (v.place_id === place.place_id ? true : false)
-        })))
+        // setResults((prev) => prev.map((v, i) => ({
+        //     ...v, selected: (v.place_id === place.place_id ? true : false)
+        // })))
+        setResults((prev) => prev.map((v, i) => {
+            if (v.place_id === place.place_id) {
+                setSelectedIndex(index)
+                return {
+                    ...v, selected : true
+                }
+            } else {
+                return {
+                    ...v, selected : false
+                }
+            }
+        }))
     }
 
     function numToSSColumn(num) {
@@ -357,7 +370,7 @@ const Map = (props) => {
             </div>
 
             <div className={openDetail ? classes.detailItemOpened : classes.detailItemNotOpened}>
-                <DetailItem
+                {/* <DetailItem
                     name="피자에땅 경대점"
                     address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
                     phone_number="053-939-2277"
@@ -366,7 +379,18 @@ const Map = (props) => {
                     distance_rate={5}
                     taste_rate={3.4}
                     clickRate={() => dialogOpen()}
-                />
+                /> */}
+                {(results !== null && <DetailItem
+                    // name={results[selectedIndex].name}
+                    // address={results[selectedIndex].vicinity}
+                    phone_number='now on test'
+                    // distance={results[selectedIndex].distance}
+                    // total_rate={results[selectedIndex].rating ? results[selectedIndex].rating : 0}
+                    distance_rate='now on test'
+                    taste_rate='now on test'
+                    {...results[selectedIndex]}
+                    clickRate={() => dialogOpen()}
+                />)}
             </div>
 
             <Dialog
@@ -490,7 +514,7 @@ const LocationItem = (props) => {
 
 
 const DetailItem = (props) => {
-
+    console.log(props)
     return (
         <>
             <TableContainer>
@@ -549,7 +573,7 @@ const DetailItem = (props) => {
                         </TableRow>
                         <TableRow>
                             <TableCell>
-                                DISTANCE<br />RATE
+                                ACCESSIBILITY<br />RATE
                             </TableCell>
                             <TableCell>
                                 {props.distance_rate}
