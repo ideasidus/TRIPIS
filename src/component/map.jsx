@@ -405,6 +405,7 @@ const Map = (props) => {
                     clickRate={() => dialogOpen()}
                     reviews = {reviews}
                     selectedIndex = {selectedIndex}
+                    btnName="Rate!"
                 />)}
             </div>
 

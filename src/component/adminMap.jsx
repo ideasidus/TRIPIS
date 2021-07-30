@@ -464,7 +464,6 @@ const AdminMap = (props) => {
                         : search.map((item => (({ place_id, name, rating, vicinity }) => ({ id:place_id, name, rating, vicinity }))(item)))
                     }
                 >
-
                 </UpdateList>
             </div>
             <div id="map" className={center !== null ? classes.mapOpened : classes.mapNotOpened}>
