@@ -481,7 +481,7 @@ const AdminMap = (props) => {
                     distance_rate={5}
                     taste_rate={3.4}
                     btnName='Recommend!'
-                    clickBtn={() => dialogOpen()}
+                    clickBtn={() => {console.log('click recommend!')}}
                     reviews={[]}
                 />
             </div>

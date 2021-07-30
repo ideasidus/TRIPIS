@@ -402,7 +402,7 @@ const Map = (props) => {
                     distance_rate='now on test'
                     taste_rate='now on test'
                     {...results[selectedIndex]}
-                    clickRate={() => dialogOpen()}
+                    clickBtn={() => dialogOpen()}
                     reviews = {reviews}
                     selectedIndex = {selectedIndex}
                     btnName="Rate!"
