@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     leftMenu: {
-        width: '20vw',
+        width: '25vw',
         minWidth: 400,
         height: '100vh',
         overflowY: 'auto' 
@@ -42,18 +42,12 @@ const useStyles = makeStyles((theme) => ({
     
     mapOpened: {
         height: '100vh',
-        width: '60vw',
+        width: '55vw',
     },
 
     mapNotOpened: {
         height: '100vh',
-        width: '80vw',
-    },
-
-    detailItem: {
-        height: '100vh',
-        width: '20vw', 
-        minWidth: 400,
+        width: '75vw',
     },
 
     detailItemOpened: {
@@ -81,6 +75,10 @@ const useStyles = makeStyles((theme) => ({
     rateDialog: {
         justifyContent: 'center',
     },
+
+    tableTextAlign: {
+        textAlign: 'center'
+    }
 }));
 
 
@@ -111,10 +109,13 @@ const Map = (props) => {
     const [tasteRating, setTasteRating] = useState(5);
     const [distanceRating, setDistanceRating] = useState(5);
     const [overallRating, setOverallRating] = useState(5);
+    const [userName, setUserName] = useState('');
+    const [reviews, setReviews] = useState([]);
 
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('index');
 
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
     const createMarker = (place, index) => {
         if (!place.geometry || !place.geometry.location) return;
@@ -151,7 +152,8 @@ const Map = (props) => {
         const request = {
             location: location,
             radius: 1000,
-            type: 'restaurant'
+            type: 'restaurant',
+            language: 'en'
         };
 
         service.nearbySearch(request, (results, status) => {
@@ -185,9 +187,21 @@ const Map = (props) => {
         console.log(index, place.place_id, place.name)
 
         mapState.panTo(place.geometry.location)
-        setResults((prev) => prev.map((v, i) => ({
-            ...v, selected: (v.place_id === place.place_id ? true : false)
-        })))
+        // setResults((prev) => prev.map((v, i) => ({
+        //     ...v, selected: (v.place_id === place.place_id ? true : false)
+        // })))
+        setResults((prev) => prev.map((v, i) => {
+            if (v.place_id === place.place_id) {
+                setSelectedIndex(i)
+                return {
+                    ...v, selected : true
+                }
+            } else {
+                return {
+                    ...v, selected : false
+                }
+            }
+        }))
     }
 
     function numToSSColumn(num) {
@@ -301,6 +315,16 @@ const Map = (props) => {
         console.log('results change : ', results)
     }, [results])
 
+    const addReviews = () => {
+        setReviews(reviews.concat([{
+            index: selectedIndex,
+            username: userName,
+            tasteRating: tasteRating,
+            distanceRating: distanceRating,
+            overallRating: overallRating
+        }]));
+    }
+
     return (
         // <div style={{ display: 'flex' }}>
         <div className={classes.root}>
@@ -359,7 +383,7 @@ const Map = (props) => {
             </div>
 
             <div className={openDetail ? classes.detailItemOpened : classes.detailItemNotOpened}>
-                <DetailItem
+                {/* <DetailItem
                     name="피자에땅 경대점"
                     address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
                     phone_number="053-939-2277"
@@ -367,9 +391,21 @@ const Map = (props) => {
                     total_rate={4.2}
                     distance_rate={5}
                     taste_rate={3.4}
-                    btnName='Rate'
-                    clickBtn={() => dialogOpen()}
-                />
+                    clickRate={() => dialogOpen()}
+                /> */}
+                {(results !== null && <DetailItem
+                    // name={results[selectedIndex].name}
+                    // address={results[selectedIndex].vicinity}
+                    phone_number='now on test'
+                    // distance={results[selectedIndex].distance}
+                    // total_rate={results[selectedIndex].rating ? results[selectedIndex].rating : 0}
+                    distance_rate='now on test'
+                    taste_rate='now on test'
+                    {...results[selectedIndex]}
+                    clickRate={() => dialogOpen()}
+                    reviews = {reviews}
+                    selectedIndex = {selectedIndex}
+                />)}
             </div>
 
             <Dialog
@@ -383,6 +419,12 @@ const Map = (props) => {
                 <DialogContent>
                     <TableContainer>
                         <Table>
+                            <TableRow>
+                                <TableCell>Name : </TableCell>
+                                <TableCell>
+                                    <input type="text" value={userName} onChange={(e) => { setUserName(e.target.value) }}/>
+                                </TableCell>
+                            </TableRow>
                             <TableRow>
                                 <TableCell>Taste : </TableCell>
                                 <TableCell>
@@ -405,8 +447,8 @@ const Map = (props) => {
                     </TableContainer>
                 </DialogContent>
 
-                <DialogActions className={classes.rateDialog}>
-                    <Button>Submit</Button>
+                <DialogActions>
+                    <Button onClick={() => {console.log("리뷰"); addReviews(); dialogClose();}}>Submit</Button>
                 </DialogActions>
             </Dialog>
         </div>
@@ -418,6 +460,7 @@ const Map = (props) => {
 const SortTableHead = (props) => {
 
     const { orderBy, order, onRequestSort } = props;
+    const classes = useStyles();
 
     const headCells = [
         { id: 'index', label: 'index', sort: false },
@@ -434,7 +477,7 @@ const SortTableHead = (props) => {
         <TableHead>
             <TableRow>
                 {headCells.map((headCell) => (
-                    (headCell.sort ? <TableCell sortDirection={orderBy === headCell.id ? order : false}>
+                    (headCell.sort ? <TableCell sortDirection={orderBy === headCell.id ? order : false} className={classes.tableTextAlign}>
                         <TableSortLabel
                             active={orderBy === headCell.id}
                             direction={orderBy === headCell.id ? order : 'asc'}
@@ -447,8 +490,9 @@ const SortTableHead = (props) => {
                                 </span>
                             ) : null} */}
                         </TableSortLabel>
-                    </TableCell> : <TableCell> {headCell.label} </TableCell>)
+                    </TableCell> : <TableCell className={classes.tableTextAlign}> { headCell.label }</TableCell>)
                 ))}
+
             </TableRow>
         </TableHead>
     )
@@ -473,16 +517,16 @@ const LocationItem = (props) => {
         // </ListItem>
         // <TableRow onClick={props.click} style={{backgroundColor: props.selected ? '#808080' : '#ffffff'}}>
         <TableRow onClick={props.click} className={props.selected ? classes.tableSelected : classes.tableNotSelected}>
-            <TableCell>
+            <TableCell className={classes.tableTextAlign} >
                 {props.index}
             </TableCell>
             <TableCell>
                 {props.name}
             </TableCell>
-            <TableCell>
+            <TableCell className={classes.tableTextAlign} >
                 {props.rating != 0 ? props.rating : 'Not Rated Yet'} <Rating name="read-only" value={props.rating} readOnly />
             </TableCell>
-            <TableCell>
+            <TableCell className={classes.tableTextAlign} >
                 {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
             </TableCell>
         </TableRow>
@@ -491,14 +535,15 @@ const LocationItem = (props) => {
 
 
 const DetailItem = (props) => {
-
+    const classes = useStyles();
+    console.log(props)
     return (
         <>
             <TableContainer>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>
+                            <TableCell style={{width: 130}}>
                                 Kind
                             </TableCell>
                             <TableCell>
@@ -521,7 +566,8 @@ const DetailItem = (props) => {
                                 ADDRESS
                             </TableCell>
                             <TableCell>
-                                {props.address}
+                                {/* {props.address} */}
+                                {props.vicinity}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -537,7 +583,7 @@ const DetailItem = (props) => {
                                 DISTANCE
                             </TableCell>
                             <TableCell>
-                                {props.distance}
+                                {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -545,12 +591,13 @@ const DetailItem = (props) => {
                                 TOTAL<br />RATE
                             </TableCell>
                             <TableCell>
-                                {props.total_rate}
+                                {/* {props.total_rate} */}
+                                {props.rating}
                             </TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell>
-                                DISTANCE<br />RATE
+                                ACCESSIBILITY<br />RATE
                             </TableCell>
                             <TableCell>
                                 {props.distance_rate}
@@ -564,7 +611,38 @@ const DetailItem = (props) => {
                                 {props.taste_rate}
                             </TableCell>
                         </TableRow>
-
+                    </TableBody>
+                </Table>
+                <br/>
+                💎Reviews
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>
+                                NickName
+                            </TableCell>
+                            <TableCell>
+                                Taste
+                            </TableCell>
+                            <TableCell>
+                                Distance
+                            </TableCell>
+                            <TableCell>
+                                Overall
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {props.reviews !== [] && props.reviews.map((item, index) => {
+                            if (item.index == props.selectedIndex) {
+                                return <ReviewItem
+                                username = {item.username}
+                                tasteRating = {item.tasteRating}
+                                distanceRating = {item.distanceRating}
+                                overallRating = {item.overallRating}
+                            />
+                            }
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -573,6 +651,26 @@ const DetailItem = (props) => {
             </Button>
         </>
 
+    )
+}
+
+const ReviewItem = (props) => {
+    const classes = useStyles();
+    return (
+        <TableRow>
+            <TableCell className={classes.tableTextAlign} >
+                {props.username}
+            </TableCell>
+            <TableCell className={classes.tableTextAlign}>
+                {props.tasteRating}
+            </TableCell>
+            <TableCell className={classes.tableTextAlign} >
+                {props.distanceRating}
+            </TableCell>
+            <TableCell className={classes.tableTextAlign} >
+                {props.overallRating}
+            </TableCell>
+        </TableRow>
     )
 }
 
