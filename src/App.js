@@ -377,7 +377,9 @@ const App = () => {
         <SideNav weatherTemp={weatherTemp} weatherIcon={weatherIcon}/>
         <Switch>
           <Redirect exact from="/" to="/restaurant"/>
-          <Route path="/restaurant" component={() => <Map />} />
+          <Route path="/restaurant" component={() => <Map type='restaurant'></Map>} />
+          <Route path="/attraction" component={() => <Map type='tourist_attraction'></Map>} />
+          <Route path="/event" component={() => <Map type='lodging'></Map>} />
           <Route path="/admin" component={() => <AdminMap />} />
           <Route path="/test" component={() => <Test />} />
         </Switch>
