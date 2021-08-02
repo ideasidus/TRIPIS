@@ -73,19 +73,18 @@ const SideNav = (props) => {
                         whiteSpace: 'nowrap',
                     }}
                 >
-                    TRIPIS
+                    TRIPIS  
                 </div>
             </SidebarHeader>
             <SidebarContent className={classes.content}>
                 <Menu iconShape="square" >
-                    <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
+                    {/* <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
                         <MenuItem>{props.weatherTemp}℃</MenuItem>
                         <MenuItem>{props.weatherDesc}</MenuItem>
-                    </SubMenu>
+                    </SubMenu> */}
                     <SubMenu title="Restaurant" icon={<MailIcon />} onClick={(e) => clickHandler('restaurant')}>
                         <MenuItem>Restaurant</MenuItem>
                     </SubMenu>
-
                     <SubMenu title="Attraction" icon={<MailIcon />} onClick={(e) => clickHandler('attracttion')}>
                         <MenuItem>Attraction</MenuItem>
                     </SubMenu>
@@ -93,6 +92,12 @@ const SideNav = (props) => {
                         <MenuItem>Event</MenuItem>
                     </SubMenu>
                 </Menu>    
+                <Menu >
+                    <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
+                        <MenuItem>{props.weatherTemp}℃</MenuItem>
+                        <MenuItem>{props.weatherDesc}</MenuItem>
+                    </SubMenu>
+                </Menu>
             </SidebarContent>
 
             <SidebarFooter style={{ textAlign: 'center' }}>
