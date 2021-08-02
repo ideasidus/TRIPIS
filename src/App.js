@@ -23,6 +23,7 @@ const App = () => {
 
   const [weatherTemp, setWeatherTemp] = useState('');
   const [weatherIcon, setWeatherIcon] = useState('');
+  const [weatherDesc, setWeatherDesc] = useState('');
 
   useEffect(() => {
     let response;
@@ -30,9 +31,10 @@ const App = () => {
       response = weatherAPI().then((result) => {
         console.log('weather result', result)
         if (result.status === "success") {
-          console.log('in success', result.temp, result.icon)
+          console.log('in success', result.temp, result.icon, result.desc)
           setWeatherTemp((prev) => result.temp)
           setWeatherIcon((prev) => result.icon)
+          setWeatherDesc((prev) => result.desc)
         }
       });
     }
@@ -266,7 +268,7 @@ const App = () => {
   return (
     <div className="App" style={{ display: "flex" }}>
       <Router>
-        <SideNav weatherTemp={weatherTemp} weatherIcon={weatherIcon}/>
+        <SideNav weatherTemp={weatherTemp} weatherIcon={weatherIcon} weatherDesc={weatherDesc}/>
         <Switch>
           <Redirect exact from="/" to="/restaurant"/>
           <Route path="/restaurant" component={() => <Map />} />

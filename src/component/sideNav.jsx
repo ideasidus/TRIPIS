@@ -63,7 +63,7 @@ const SideNav = (props) => {
             <SidebarHeader>
                 <div
                     style={{
-                        padding: '8px',
+                        padding: '5px',
                         textTransform: 'uppercase',
                         fontWeight: 'bold',
                         fontSize: 14,
@@ -73,13 +73,14 @@ const SideNav = (props) => {
                         whiteSpace: 'nowrap',
                     }}
                 >
-                    TRIPS
+                    TRIPIS
                 </div>
             </SidebarHeader>
             <SidebarContent className={classes.content}>
                 <Menu iconShape="square" >
                     <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
-                        <MenuItem>{props.weatherTemp}</MenuItem>
+                        <MenuItem>{props.weatherTemp}℃</MenuItem>
+                        <MenuItem>{props.weatherDesc}</MenuItem>
                     </SubMenu>
                     <SubMenu title="Restaurant" icon={<MailIcon />} onClick={(e) => clickHandler('restaurant')}>
                         <MenuItem>Restaurant</MenuItem>
