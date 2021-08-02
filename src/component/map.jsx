@@ -4,6 +4,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Rating } from '@material-ui/lab'
 import haversine from 'haversine-distance'
 
+import StarIcon from '@material-ui/icons/Star';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+
 import { getRestaurant as LS2getRestaurant } from "./LS2Request";
 import LS2Request from "@enact/webos/LS2Request";
 
@@ -484,7 +488,7 @@ const SortTableHead = (props) => {
     const classes = useStyles();
 
     const headCells = [
-        { id: 'index', label: 'index', sort: false },
+        { id: 'index', label: 'index', sort: true },
         { id: 'name', label: 'name', sort: false },
         { id: 'rating', label: 'rating', sort: true },
         { id: 'distance', label: 'distance', sort: true },
@@ -503,6 +507,7 @@ const SortTableHead = (props) => {
                             active={orderBy === headCell.id}
                             direction={orderBy === headCell.id ? order : 'asc'}
                             onClick={createSortHandler(headCell.id)}
+                            IconComponent={headCell.id !== 'index' ? ArrowDownwardIcon : order === 'asc' ? StarIcon : StarBorderIcon }
                         >
                             {headCell.label}
                             {/* {orderBy === headCell.id ? (
