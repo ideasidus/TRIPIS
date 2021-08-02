@@ -11,6 +11,8 @@ import { useEffect } from 'react';
 
 import { DetailItem } from './map';
 
+import { getRestaurant as LS2getRestaurant } from "./LS2Request";
+
 const useStyles = makeStyles((theme) => ({
     listSection: {
         width: '20vw', minWidth: 400, height: '100vh', overflowY: 'auto',
@@ -345,8 +347,15 @@ const AdminMap = (props) => {
     }
 
     const searchFiltering = () => {
-        // process
+        // db
         // search.filter(~~~)
+
+        LS2getRestaurant().then((results) => {
+            const [recommend, notRecommend] = results;
+            const sumList = recommend.data.concat(notRecommend.data)
+
+            setSearch((prev) => prev.filter( x => !sumList.includes(x)))
+        })
 
         setLoading(false);
     }
@@ -456,7 +465,7 @@ const AdminMap = (props) => {
 
                 <Button variant="contained" color="primary">
                     {loading && <CircularProgress color="secondary" />}
-                    Update!! ({search.length})
+                    {loading ? 'Loading...' : `Update All!! (${search.length})`}
                 </Button>
 
                 <UpdateList
@@ -508,8 +517,6 @@ const UpdateList = (props) => {
         { id: 8, name: 'Frances', rating: 'Rossini', vicinity: 36, test: 't' },
         { id: 9, name: 'Roxie', rating: 'Harvey', vicinity: 65, test: 't' },
     ];
-
-    console.log('in updateList', props.rows)
 
     return (
         <DataGrid

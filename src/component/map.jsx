@@ -152,7 +152,7 @@ const Map = (props) => {
         return marker;
     }
 
-    const getRestaurant = (request_type) => {
+    const getDumiRestaurant = (request_type) => {
         const request = {
             location: location,
             radius: 2000,
@@ -314,7 +314,7 @@ const Map = (props) => {
                 map: map,
             });
 
-            getRestaurant(request_type)
+            // getDumiRestaurant(request_type)
         }
 
 

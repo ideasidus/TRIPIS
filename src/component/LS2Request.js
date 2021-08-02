@@ -17,12 +17,10 @@ const getRestaurant = () => {
                 },
             },
             onSuccess: (res) => {
-                // console.log('recommend', res.results);
                 resolve( { status : 'success', data: res.results} )
             },
             onFailure: (res) => {
-                // console.log('recommend fail', res);
-                resolve( { status: 'fail' } )
+                resolve( { status: 'fail', data: [] } )
             }
         })
     })
@@ -51,7 +49,7 @@ const getRestaurant = () => {
             },
             onFailure: (res) => {
                 // console.log('notRecommend fail', res);
-                resolve( { status: 'fail' } )
+                resolve( { status: 'fail', data: [] } )
             }
         })
     })
@@ -73,6 +71,7 @@ const getAttraction = () => {
 const getEvent = () => {
     
 }
+
 
 const testExport = () => {
     console.log('test');
