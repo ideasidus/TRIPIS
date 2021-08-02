@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
             // fontSize: "14px",
             padding: "8px 35px 8px 10px!important",
         }
-    }
+    },
 }));
 
 
@@ -68,20 +68,22 @@ const SideNav = (props) => {
                         // overflow: 'auto',
                         // textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        height: '32px',
+                        marginTop: '15px'
                     }}
                 >
-                    TRIPIS  
+                    <a href="/#/restaurant">TRIPIS</a>
                 </div>
             </SidebarHeader>
             <SidebarContent className={classes.content}>
                 <Menu iconShape="square" >
-                    <SubMenu title="Restaurant" icon={<img src="https://cdn.discordapp.com/attachments/859755764004683816/871692793939107850/2056978-200.png" width='35'/>} onClick={(e) => clickHandler('restaurant')}>
+                    <SubMenu title="Restaurant" icon={<img src="/restaurant.png" width='35'/>} onClick={(e) => clickHandler('restaurant')}>
                         <MenuItem>Restaurant</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Attraction" icon={<img src="https://cdn.discordapp.com/attachments/859755764004683816/871693906184646696/1736895-200.png" width='35'/>} onClick={(e) => clickHandler('attracttion')}>
+                    <SubMenu title="Attraction" icon={<img src="/attraction.png" width='35'/>} onClick={(e) => clickHandler('attracttion')}>
                         <MenuItem>Attraction</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Event" icon={<img src="https://cdn.discordapp.com/attachments/859755764004683816/871694056802111580/1298108-200.png" width='35'/>} onClick={(e) => clickHandler('event')}>
+                    <SubMenu title="Event" icon={<img src="/event.png" width='35'/>} onClick={(e) => clickHandler('event')}>
                         <MenuItem>Event</MenuItem>
                     </SubMenu>
                 </Menu>    
@@ -101,12 +103,11 @@ const SideNav = (props) => {
                     }}
                 >
                     <a
-                        href="https://github.com/ideasidus/TRIPIS"
-                        target="_blank"
+                        href="/#/admin"
                         className="sidebar-btn"
                         rel="noopener noreferrer"
                     >
-                        <GitHubIcon />
+                        <img src="/admin.png" width='35'/>
                         {/* <span> {intl.formatMessage({ id: 'viewSource' })}</span> */}
                     </a>
                 </div>
