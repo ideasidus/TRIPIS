@@ -37,11 +37,8 @@ const SideNav = (props) => {
     //     // setActiveKey(eventKey)
     // }
 
-    console.log('in SideNav', props)
 
     const clickHandler = (key) => {
-        console.log('click', key)
-
         if (key === 'restaurant') {
             history.push('/restaurant');
         } else if (key === 'attracttion'){

@@ -36,7 +36,6 @@ function weatherAPI() {
     // }
 
     const url = "https://api.openweathermap.org/data/2.5/weather";
-    console.log('in weahter appid', process.env.REACT_APP_OPEN_WEATHER_MAP_API_KEY)
     return axios.get(url, {
         params: {
             lat: center.lat,
@@ -47,12 +46,10 @@ function weatherAPI() {
     .then(function (response) {
         // setTemp(response.main.temp);
         // setPhotos(response.weather.icon)
-        console.log("성공", response);
 
         return { status: "success", temp: Math.round(response.data.main.temp-273), icon: response.data.weather[0].icon, desc: response.data.weather[0].description}
     })
     .catch(function (error) {
-        console.log("실패", error);
         return { status: "fail" }
     })
 

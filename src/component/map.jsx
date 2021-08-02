@@ -5,6 +5,7 @@ import { Rating } from '@material-ui/lab'
 import haversine from 'haversine-distance'
 
 import { getRestaurant as LS2getRestaurant } from "./LS2Request";
+import LS2Request from "@enact/webos/LS2Request";
 
 import GoogleMapReact from "google-map-react";
 import axios from "axios";
@@ -187,8 +188,6 @@ const Map = (props) => {
 
     const clickHandler = (index, place) => {
 
-        console.log(index, place.place_id, place.name)
-
         mapState.panTo(place.geometry.location)
         // setResults((prev) => prev.map((v, i) => ({
         //     ...v, selected: (v.place_id === place.place_id ? true : false)
@@ -245,9 +244,6 @@ const Map = (props) => {
             return a[1] - b[1];
         });
 
-        console.log('in stableSort ', stabilizedThis)
-        console.log('now all marker', markers)
-
         return stabilizedThis.map((el, index) => {
 
             markers[el[1]].setLabel(numToSSColumn(index + 1))
@@ -275,17 +271,22 @@ const Map = (props) => {
 
     useEffect(() => {
         const initRestaurant = () => {
-            const [recommend, notRecommend] = LS2getRestaurant()
-            if ( recommend.status === 'success') {
-                setResults((prev) => recommend.data.map((item) => (
+            LS2getRestaurant().then(results => {
+                console.log('getLS2Restaurant results',results)
+
+                const [recommend, notRecommend] = results;
+
+                if ( recommend.status && recommend.status === 'success') {
+                    setResults((prev) => recommend.data.map((item) => (
+                            Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                    )));
+                }
+                if (notRecommend.status && notRecommend.status === 'success') {
+                    setResults((prev) => prev.concat(notRecommend.data.map((item) => (
                         Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                )));
-            }
-            if (notRecommend.status === 'success') {
-                setResults((prev) => prev.concat(notRecommend.data.map((item) => (
-                    Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                ))) );
-            }
+                    ))) );
+                }
+            })
         }
 
         const initMap = () => {
@@ -297,8 +298,6 @@ const Map = (props) => {
             service = new google.maps.places.PlacesService(map);
             location = new google.maps.LatLng(center.lat, center.lng)
             infowindow = new google.maps.InfoWindow();
-
-            console.log(center.lat, center.lng)
 
             const svgMarker = {
                 path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
@@ -318,9 +317,9 @@ const Map = (props) => {
             // getRestaurant(request_type)
         }
 
+
         initRestaurant()
         initMap()
-        // console.log(typeof map)
         // setMapState((prev) => map)
 
         // setMapState(map)
@@ -558,7 +557,6 @@ const LocationItem = (props) => {
 
 const DetailItem = (props) => {
     const classes = useStyles();
-    console.log(props)
     return (
         <>
             <TableContainer>
