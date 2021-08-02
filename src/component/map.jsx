@@ -152,7 +152,7 @@ const Map = (props) => {
     const getRestaurant = (request_type) => {
         const request = {
             location: location,
-            radius: 1000,
+            radius: 2000,
             type: request_type,
             language: 'en'
         };
@@ -287,10 +287,10 @@ const Map = (props) => {
             const svgMarker = {
                 path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
                 fillColor: "blue",
-                fillOpacity: 0.6,
+                fillOpacity: 0.8,
                 strokeWeight: 0,
                 rotation: 0,
-                scale: 2,
+                scale: 3,
                 anchor: new google.maps.Point(15, 30),
             };
             new google.maps.Marker({
@@ -333,11 +333,11 @@ const Map = (props) => {
         <div className={classes.root}>
 
             <div className={classes.leftMenu}>
-                <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
+                {/* <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
                     <Button color="inherit" onClick={getRestaurant}>Restaurant</Button>
                     <Button color="inherit">Attraction</Button>
                     <Button color="inherit">Event</Button>
-                </ButtonGroup>
+                </ButtonGroup> */}
                 <Divider />
                 {/* <List>
                     {results !== null && results.map((item, index) => {
@@ -532,7 +532,7 @@ const LocationItem = (props) => {
                 {props.rating != 0 ? props.rating : 'Not Rated Yet'} <Rating name="read-only" value={props.rating} readOnly />
             </TableCell>
             <TableCell className={classes.tableTextAlign} >
-                {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
+                {props.distance >= 1000 ? Math.round((props.distance) / 100) / 10 + 'km' : props.distance + 'm'}
             </TableCell>
         </TableRow>
     )
@@ -588,7 +588,7 @@ const DetailItem = (props) => {
                                 DISTANCE
                             </TableCell>
                             <TableCell>
-                                {props.distance >= 1000 ? (props.distance) / 1000 + 'km' : props.distance + 'm'}
+                                {props.distance >= 1000 ? Math.round((props.distance) / 100) / 10 + 'km' : props.distance + 'm'}
                             </TableCell>
                         </TableRow>
                         <TableRow>
