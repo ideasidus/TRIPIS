@@ -101,6 +101,7 @@ const Map = (props) => {
 
     //   const mapEl = document.getElementById('map');
     const classes = useStyles();
+    const request_type = props.type
 
     const [results, setResults] = useState([]);
     const [markers, setMarkers] = useState([]);
@@ -150,11 +151,11 @@ const Map = (props) => {
         return marker;
     }
 
-    const getRestaurant = () => {
+    const getRestaurant = (request_type) => {
         const request = {
             location: location,
             radius: 1000,
-            type: 'restaurant',
+            type: request_type,
             language: 'en'
         };
 
@@ -302,6 +303,8 @@ const Map = (props) => {
                 icon: svgMarker,
                 map: map,
             });
+
+            getRestaurant(request_type)
         }
 
         initRestaurant()
@@ -420,7 +423,7 @@ const Map = (props) => {
                 onClose={dialogClose}
             >
                 <DialogTitle>
-                    Dialog Title
+                    Rate
                 </DialogTitle>
 
                 <DialogContent>
@@ -455,7 +458,8 @@ const Map = (props) => {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={() => {console.log("리뷰"); addReviews(); dialogClose();}}>Submit</Button>
+                    <Button onClick={() => {addReviews(); dialogClose();}}>Submit</Button>
+                    <Button onClick={() => {dialogClose();}}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </div>

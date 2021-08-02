@@ -23,6 +23,7 @@ const App = () => {
 
   const [weatherTemp, setWeatherTemp] = useState('');
   const [weatherIcon, setWeatherIcon] = useState('');
+  const [weatherDesc, setWeatherDesc] = useState('');
 
   useEffect(() => {
     let response;
@@ -30,9 +31,10 @@ const App = () => {
       response = weatherAPI().then((result) => {
         console.log('weather result', result)
         if (result.status === "success") {
-          console.log('in success', result.temp, result.icon)
+          console.log('in success', result.temp, result.icon, result.desc)
           setWeatherTemp((prev) => result.temp)
           setWeatherIcon((prev) => result.icon)
+          setWeatherDesc((prev) => result.desc)
         }
       });
     }
@@ -267,15 +269,125 @@ const App = () => {
           console.log('\t',res);
       }
     })
+    // make restaurant review DB
+    new LS2Request().send({
+      service: 'com.webos.service.db',
+      method: 'putKind',
+      parameters: {
+          "id":"com.trip.info:4",
+          "owner":"com.tripis.app", 
+          "schema": {
+              "type":"object",
+              "properties": {
+                  "PlaceID":{"type":"string"},
+                  "UserName":{"type":"string"},
+                  "Password":{"type":"string"},
+                  "DistanceRate":{"type":"number"},
+                  "TasteRate":{"type":"number"},
+                  "TotalRate":{"type":"number"},
+                  "TotalPrice":{"type":"number"},
+                  "NumberOFCustomer":{"type":"number"}
+              }
+          },
+          "indexes":[
+              {
+                  "name":"indexPlaceID",
+                  "props":[{"name":"PlaceID"}]
+              },
+              {
+                  "name":"indexDistanceRate",
+                  "props":[{"name":"DistanceRate"}]
+              },
+              {
+                  "name":"indexTasteRate",
+                  "props":[{"name":"TasteRate"}]
+              },
+              {
+                  "name":"indexTotalRate",
+                  "props":[{"name":"TotalRate"}]
+              },
+              {
+                  "name":"indexTotalPrice",
+                  "props":[{"name":"TotalPrice"}]
+              },
+              {
+                  "name":"indexNumberOfCustomer",
+                  "props":[{"name":"NumberOFCustomer"}]
+              }
+          ]
+      },
+      onSuccess: (res) => {
+          console.log('\t',res.results);
+      },
+      onFailure: (res) => {
+          console.log('\t',res);
+      }
+    })
+    // make attraction review DB
+    new LS2Request().send({
+      service: 'com.webos.service.db',
+      method: 'putKind',
+      parameters: {
+          "id":"com.trip.info:5",
+          "owner":"com.tripis.app", 
+          "schema": {
+              "type":"object",
+              "properties": {
+                  "PlaceID":{"type":"string"},
+                  "UserName":{"type":"string"},
+                  "Password":{"type":"string"},
+                  "DistanceRate":{"type":"number"},
+                  "ReservationRequired":{"type":"boolean"},
+                  "TotalRate":{"type":"number"},
+                  "SatisfactionRate":{"type":"number"},
+                  "Fees":{"type":"boolean"}
+              }
+          },
+          "indexes":[
+              {
+                  "name":"indexPlaceID",
+                  "props":[{"name":"PlaceID"}]
+              },
+              {
+                  "name":"indexDistanceRate",
+                  "props":[{"name":"DistanceRate"}]
+              },
+              {
+                  "name":"indexReservationRequired",
+                  "props":[{"name":"ReservationRequired"}]
+              },
+              {
+                  "name":"indexSatisfactionRate",
+                  "props":[{"name":"SatisfactionRate"}]
+              },
+              {
+                  "name":"indexFees",
+                  "props":[{"name":"Fees"}]
+              },
+              {
+                  "name":"indexTotalRate",
+                  "props":[{"name":"TotalRate"}]
+              }
+          ]
+      },
+      onSuccess: (res) => {
+          console.log('\t',res.results);
+      },
+      onFailure: (res) => {
+          console.log('\t',res);
+      }
+    })
   }, [])
 
   return (
     <div className="App" style={{ display: "flex" }}>
       <Router>
-        <SideNav weatherTemp={weatherTemp} weatherIcon={weatherIcon}/>
+        <SideNav weatherTemp={weatherTemp} weatherIcon={weatherIcon} weatherDesc={weatherDesc}/>
         <Switch>
           <Redirect exact from="/" to="/restaurant"/>
-          <Route path="/restaurant" component={() => <Map />} />
+          <Route path="/restaurant" component={() => <Map type='restaurant'></Map>} />
+          <Route path="/attraction" component={() => <Map type='tourist_attraction'></Map>} />
+          <Route path="/event" component={() => <Map type='lodging'></Map>} />
           <Route path="/admin" component={() => <AdminMap />} />
           <Route path="/test" component={() => <Test />} />
         </Switch>
