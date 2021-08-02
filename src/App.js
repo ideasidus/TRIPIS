@@ -40,6 +40,8 @@ const App = () => {
     getWeather();
 
     console.log("Make DB!")
+
+    //restaurant
     new LS2Request().send({
       service: 'com.webos.service.db',
       method: 'putKind',
@@ -115,6 +117,8 @@ const App = () => {
           console.log('\t',res);
       }
     })
+
+    //attraction
     new LS2Request().send({
       service: 'com.webos.service.db',
       method: 'putKind',
@@ -190,6 +194,8 @@ const App = () => {
           console.log('\t',res);
       }
     })
+
+    //event
     new LS2Request().send({
       service: 'com.webos.service.db',
       method: 'putKind',

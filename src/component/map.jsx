@@ -4,6 +4,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Rating } from '@material-ui/lab'
 import haversine from 'haversine-distance'
 
+import { getRestaurant as LS2getRestaurant } from "./LS2Request";
+
 import GoogleMapReact from "google-map-react";
 import axios from "axios";
 
@@ -271,7 +273,10 @@ const Map = (props) => {
 
 
     useEffect(() => {
-        const init = () => {
+        const initRestaurant = () => {
+            LS2getRestaurant()
+        }
+        const initMap = () => {
             map = new google.maps.Map(document.getElementById("map"), {
                 center: { lat: center.lat, lng: center.lng },
                 zoom: 15,
@@ -299,7 +304,8 @@ const Map = (props) => {
             });
         }
 
-        init()
+        initRestaurant()
+        initMap()
         // console.log(typeof map)
         // setMapState((prev) => map)
 
