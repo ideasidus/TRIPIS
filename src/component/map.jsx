@@ -417,7 +417,7 @@ const Map = (props) => {
                 onClose={dialogClose}
             >
                 <DialogTitle>
-                    Dialog Title
+                    Rate
                 </DialogTitle>
 
                 <DialogContent>
@@ -452,7 +452,8 @@ const Map = (props) => {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={() => {console.log("리뷰"); addReviews(); dialogClose();}}>Submit</Button>
+                    <Button onClick={() => {addReviews(); dialogClose();}}>Submit</Button>
+                    <Button onClick={() => {dialogClose();}}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </div>
