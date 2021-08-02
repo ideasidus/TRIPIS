@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 
-import { HashRouter as Router, Route, Switch } from "react-router-dom";
+import { HashRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 import React, { useState, useEffect } from 'react'
 
 import './App.css';
@@ -43,7 +43,8 @@ const App = () => {
       <Router>
         <SideNav weatherTemp={weatherTemp} weatherIcon={weatherIcon}/>
         <Switch>
-          <Route exact path="/" component={() => <Map />} />
+          <Redirect exact from="/" to="/restaurant"/>
+          <Route path="/restaurant" component={() => <Map />} />
           <Route path="/admin" component={() => <AdminMap />} />
           <Route path="/test" component={() => <Test />} />
         </Switch>

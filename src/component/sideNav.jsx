@@ -9,9 +9,10 @@ import React, { useState } from "react";
 import { ProSidebar, Menu, MenuItem, SubMenu, SidebarHeader, SidebarContent, SidebarFooter } from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
 
+import { useHistory, Link } from 'react-router-dom'
 
 const SideNav = (props) => {
-
+    let history = useHistory();
     // const [collapsed, setCollapsed] = useState(false);
     // const [toggled, setToggled] = useState(false);
 
@@ -21,6 +22,18 @@ const SideNav = (props) => {
     // }
 
     console.log('in SideNav', props)
+
+    const clickHandler = (key) => {
+        console.log('click', key)
+
+        if (key === 'restaurant') {
+            history.push('/restaurant');
+        } else if (key === 'attracttion'){
+            history.push('/attraction')
+        } else if (key === 'event') {
+            history.push('/event')
+        }
+    }
 
     return (
         <ProSidebar
@@ -51,13 +64,14 @@ const SideNav = (props) => {
                     <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img" />}>
                         <MenuItem>{props.weatherTemp}</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Restaurant" icon={<MailIcon />}>
+                    <SubMenu title="Restaurant" icon={<MailIcon />} onClick={(e) => clickHandler('restaurant')}>
                         <MenuItem>Restaurant</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Attraction" icon={<MailIcon />}>
+
+                    <SubMenu title="Attraction" icon={<MailIcon />} onClick={(e) => clickHandler('attracttion')}>
                         <MenuItem>Attraction</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Event" icon={<MailIcon />}>
+                    <SubMenu title="Event" icon={<MailIcon />} onClick={(e) => clickHandler('event')}>
                         <MenuItem>Event</MenuItem>
                     </SubMenu>
                 </Menu>
