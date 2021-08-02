@@ -46,8 +46,8 @@ const SideNav = (props) => {
             </SidebarHeader>
             <SidebarContent>
                 <Menu iconShape="square">
-                    <SubMenu title="Weather" icon={<MailIcon />}>
-                        <MenuItem>Weather 정보 ~~ </MenuItem>
+                    <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img" />}>
+                        <MenuItem>{props.weatherTemp}</MenuItem>
                     </SubMenu>
                     <SubMenu title="Restaurant" icon={<MailIcon />}>
                         <MenuItem>Restaurant</MenuItem>

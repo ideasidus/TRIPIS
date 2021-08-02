@@ -1,13 +1,15 @@
 import logo from './logo.svg';
 
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import './App.css';
 import Map from './component/map'
 import AdminMap from './component/adminMap'
 import Test from './component/test'
 import SideNav from './component/sideNav';
+
+import weatherAPI from './component/weather';
 
 const App = () => {
 
@@ -17,11 +19,31 @@ const App = () => {
   //   setMapLoad(true)
   // })
 
+  const [weatherTemp, setWeatherTemp] = useState('');
+  const [weatherIcon, setWeahterIcon] = useState('');
 
-  return  (
-    <div className="App" style={{display:"flex"}}>
+  console.log('weather now : ',weatherTemp, weatherIcon)
+
+  useEffect(() => {
+    let response;
+    function getWeather() {
+      response = weatherAPI().then((result) => {
+        console.log(result)
+        if (result === "success") {
+          setWeahterIcon(result.temp)
+          setWeahterIcon(result.icon)
+        }
+      });
+      console.log('weather response',response);
+    }
+
+    getWeather();
+  }, [])
+
+  return (
+    <div className="App" style={{ display: "flex" }}>
       <Router>
-        <SideNav/>
+        <SideNav weatherTemp={weatherTemp} weatherIcon={weatherIcon}/>
         <Switch>
           <Route exact path="/" component={() => <Map />} />
           <Route path="/admin" component={() => <AdminMap />} />
