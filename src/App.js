@@ -20,21 +20,19 @@ const App = () => {
   // })
 
   const [weatherTemp, setWeatherTemp] = useState('');
-  const [weatherIcon, setWeahterIcon] = useState('');
-
-  console.log('weather now : ',weatherTemp, weatherIcon)
+  const [weatherIcon, setWeatherIcon] = useState('');
 
   useEffect(() => {
     let response;
     function getWeather() {
       response = weatherAPI().then((result) => {
-        console.log(result)
-        if (result === "success") {
-          setWeahterIcon(result.temp)
-          setWeahterIcon(result.icon)
+        console.log('weather result', result)
+        if (result.status === "success") {
+          console.log('in success', result.temp, result.icon)
+          setWeatherTemp((prev) => result.temp)
+          setWeatherIcon((prev) => result.icon)
         }
       });
-      console.log('weather response',response);
     }
 
     getWeather();

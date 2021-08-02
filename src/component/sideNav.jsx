@@ -20,6 +20,8 @@ const SideNav = (props) => {
     //     // setActiveKey(eventKey)
     // }
 
+    console.log('in SideNav', props)
+
     return (
         <ProSidebar
             toggle={true}
