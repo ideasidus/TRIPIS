@@ -75,17 +75,13 @@ const SideNav = (props) => {
             </SidebarHeader>
             <SidebarContent className={classes.content}>
                 <Menu iconShape="square" >
-                    {/* <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
-                        <MenuItem>{props.weatherTemp}℃</MenuItem>
-                        <MenuItem>{props.weatherDesc}</MenuItem>
-                    </SubMenu> */}
-                    <SubMenu title="Restaurant" icon={<MailIcon />} onClick={(e) => clickHandler('restaurant')}>
+                    <SubMenu title="Restaurant" icon={<img src="https://cdn.discordapp.com/attachments/859755764004683816/871692793939107850/2056978-200.png" width='35'/>} onClick={(e) => clickHandler('restaurant')}>
                         <MenuItem>Restaurant</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Attraction" icon={<MailIcon />} onClick={(e) => clickHandler('attracttion')}>
+                    <SubMenu title="Attraction" icon={<img src="https://cdn.discordapp.com/attachments/859755764004683816/871693906184646696/1736895-200.png" width='35'/>} onClick={(e) => clickHandler('attracttion')}>
                         <MenuItem>Attraction</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Event" icon={<MailIcon />} onClick={(e) => clickHandler('event')}>
+                    <SubMenu title="Event" icon={<img src="https://cdn.discordapp.com/attachments/859755764004683816/871694056802111580/1298108-200.png" width='35'/>} onClick={(e) => clickHandler('event')}>
                         <MenuItem>Event</MenuItem>
                     </SubMenu>
                 </Menu>    
