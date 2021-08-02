@@ -49,7 +49,7 @@ function weatherAPI() {
         // setPhotos(response.weather.icon)
         console.log("성공", response);
 
-        return { status: "success", temp: response.data.main.temp-273, icon: response.data.weather[0].icon }
+        return { status: "success", temp: Math.round(response.data.main.temp-273), icon: response.data.weather[0].icon, desc: response.data.weather[0].description}
     })
     .catch(function (error) {
         console.log("실패", error);
