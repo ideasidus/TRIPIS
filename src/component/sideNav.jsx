@@ -10,9 +10,25 @@ import { ProSidebar, Menu, MenuItem, SubMenu, SidebarHeader, SidebarContent, Sid
 import 'react-pro-sidebar/dist/css/styles.css';
 
 import { useHistory, Link } from 'react-router-dom'
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    content: {
+        // "& nav ul li > .pro-inner-item" : {
+        //     padding: "8px 35px 8px 10px"
+        // }
+
+        "& nav ul li .pro-inner-item" : {
+            // fontSize: "14px",
+            padding: "8px 35px 8px 10px!important",
+        }
+    }
+}));
+
 
 const SideNav = (props) => {
     let history = useHistory();
+    const classes = useStyles();
     // const [collapsed, setCollapsed] = useState(false);
     // const [toggled, setToggled] = useState(false);
 
@@ -60,7 +76,7 @@ const SideNav = (props) => {
                     TRIPS
                 </div>
             </SidebarHeader>
-            <SidebarContent >
+            <SidebarContent className={classes.content}>
                 <Menu iconShape="square" >
                     <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
                         <MenuItem>{props.weatherTemp}</MenuItem>
