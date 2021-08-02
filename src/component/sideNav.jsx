@@ -29,11 +29,12 @@ const SideNav = (props) => {
             style={{
                 height: '100vh',
             }}
+            collapsedWidth='3vw'
         >
             <SidebarHeader>
                 <div
                     style={{
-                        padding: '24px',
+                        padding: '8px',
                         textTransform: 'uppercase',
                         fontWeight: 'bold',
                         fontSize: 14,
@@ -46,9 +47,9 @@ const SideNav = (props) => {
                     TRIPS
                 </div>
             </SidebarHeader>
-            <SidebarContent>
-                <Menu iconShape="square">
-                    <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img" />}>
+            <SidebarContent >
+                <Menu iconShape="square" >
+                    <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
                         <MenuItem>{props.weatherTemp}</MenuItem>
                     </SubMenu>
                     <SubMenu title="Restaurant" icon={<MailIcon />}>
@@ -60,14 +61,14 @@ const SideNav = (props) => {
                     <SubMenu title="Event" icon={<MailIcon />}>
                         <MenuItem>Event</MenuItem>
                     </SubMenu>
-                </Menu>
+                </Menu>    
             </SidebarContent>
 
             <SidebarFooter style={{ textAlign: 'center' }}>
                 <div
                     className="sidebar-btn-wrapper"
                     style={{
-                        padding: '20px 24px',
+                        padding: '20px 5px',
                     }}
                 >
                     <a

@@ -42,12 +42,12 @@ const useStyles = makeStyles((theme) => ({
     
     mapOpened: {
         height: '100vh',
-        width: '55vw',
+        width: '51vw',
     },
 
     mapNotOpened: {
         height: '100vh',
-        width: '75vw',
+        width: '72vw',
     },
 
     detailItemOpened: {
