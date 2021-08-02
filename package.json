@@ -7,10 +7,12 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "@trendmicro/react-sidenav": "^0.5.0",
     "notistack": "^1.0.10",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
+    "rsuite": "^4.10.2",
     "web-vitals": "^1.1.2"
   },
   "scripts": {
@@ -52,6 +54,7 @@
     "nodemon": "^2.0.12",
     "react-hook-google-maps": "0.0.3",
     "react-image-slider": "^0.1.0",
+    "react-pro-sidebar": "^0.6.0",
     "react-router-dom": "^5.2.0"
   }
 }
