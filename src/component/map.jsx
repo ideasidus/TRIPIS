@@ -151,39 +151,39 @@ const Map = (props) => {
         return marker;
     }
 
-    const getRestaurant = (request_type) => {
-        const request = {
-            location: location,
-            radius: 1000,
-            type: request_type,
-            language: 'en'
-        };
+    // const getRestaurant = (request_type) => {
+    //     const request = {
+    //         location: location,
+    //         radius: 1000,
+    //         type: request_type,
+    //         language: 'en'
+    //     };
 
-        service.nearbySearch(request, (results, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                let tAllMarkers = [];
-                for (let i = 0; i < results.length; i++) {
-                    var marker = createMarker(results[i], i);
-                    tAllMarkers.push(marker);
-                }
+    //     service.nearbySearch(request, (results, status) => {
+    //         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+    //             let tAllMarkers = [];
+    //             for (let i = 0; i < results.length; i++) {
+    //                 var marker = createMarker(results[i], i);
+    //                 tAllMarkers.push(marker);
+    //             }
 
-                console.log('in nearBy', tAllMarkers)
-                setMarkers((prev) => tAllMarkers);
+    //             console.log('in nearBy', tAllMarkers)
+    //             setMarkers((prev) => tAllMarkers);
 
 
-                if (results[0].geometry != null && results[0].geometry.location != null) {
-                    map.setCenter(results[0].geometry.location);
-                }
+    //             if (results[0].geometry != null && results[0].geometry.location != null) {
+    //                 map.setCenter(results[0].geometry.location);
+    //             }
 
-            }
+    //         }
 
-            setResults((prev) => results.map((item) => (
-                item.rating
-                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-            )));
-        })
-    }
+    //         setResults((prev) => results.map((item) => (
+    //             item.rating
+    //                 ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+    //                 : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+    //         )));
+    //     })
+    // }
 
     const clickHandler = (index, place) => {
 
@@ -275,8 +275,19 @@ const Map = (props) => {
 
     useEffect(() => {
         const initRestaurant = () => {
-            LS2getRestaurant()
+            const [recommend, notRecommend] = LS2getRestaurant()
+            if ( recommend.status === 'success') {
+                setResults((prev) => recommend.data.map((item) => (
+                        Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                )));
+            }
+            if (notRecommend.status === 'success') {
+                setResults((prev) => prev.concat(notRecommend.data.map((item) => (
+                    Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                ))) );
+            }
         }
+
         const initMap = () => {
             map = new google.maps.Map(document.getElementById("map"), {
                 center: { lat: center.lat, lng: center.lng },
@@ -304,7 +315,7 @@ const Map = (props) => {
                 map: map,
             });
 
-            getRestaurant(request_type)
+            // getRestaurant(request_type)
         }
 
         initRestaurant()
@@ -339,12 +350,12 @@ const Map = (props) => {
         <div className={classes.root}>
 
             <div className={classes.leftMenu}>
-                <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
+                {/* <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
                     <Button color="inherit" onClick={getRestaurant}>Restaurant</Button>
                     <Button color="inherit">Attraction</Button>
                     <Button color="inherit">Event</Button>
                 </ButtonGroup>
-                <Divider />
+                <Divider /> */}
                 {/* <List>
                     {results !== null && results.map((item, index) => {
                         return <><LocationItem
