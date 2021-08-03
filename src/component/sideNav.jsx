@@ -45,6 +45,8 @@ const SideNav = (props) => {
             history.push('/attraction')
         } else if (key === 'event') {
             history.push('/event')
+        } else if (key === 'admin') {
+            history.push('/admin')
         }
     }
 
@@ -77,13 +79,13 @@ const SideNav = (props) => {
             </SidebarHeader>
             <SidebarContent className={classes.content}>
                 <Menu iconShape="square" >
-                    <SubMenu title="Restaurant" icon={<img src="/restaurant.png" width='35'/>} onClick={(e) => clickHandler('restaurant')}>
+                    <SubMenu title="Restaurant" icon={<img src="restaurant.png" width='35'/>} onClick={(e) => clickHandler('restaurant')}>
                         <MenuItem>Restaurant</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Attraction" icon={<img src="/attraction.png" width='35'/>} onClick={(e) => clickHandler('attracttion')}>
+                    <SubMenu title="Attraction" icon={<img src="attraction.png" width='35'/>} onClick={(e) => clickHandler('attracttion')}>
                         <MenuItem>Attraction</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Event" icon={<img src="/event.png" width='35'/>} onClick={(e) => clickHandler('event')}>
+                    <SubMenu title="Event" icon={<img src="event.png" width='35'/>} onClick={(e) => clickHandler('event')}>
                         <MenuItem>Event</MenuItem>
                     </SubMenu>
                 </Menu>    
@@ -103,11 +105,11 @@ const SideNav = (props) => {
                     }}
                 >
                     <a
-                        href="/#/admin"
+                        onClick={(e) => clickHandler('admin')}
                         className="sidebar-btn"
                         rel="noopener noreferrer"
                     >
-                        <img src="/admin.png" width='35'/>
+                        <img src="admin.png" width='35'/>
                         {/* <span> {intl.formatMessage({ id: 'viewSource' })}</span> */}
                     </a>
                 </div>

@@ -277,7 +277,9 @@ const Map = (props) => {
             if (order !== 0) return order;
             return a[1] - b[1];
         });
-
+        console.log("여기야 여기!");
+        console.log(stabilizedThis);
+        console.log("여기까지!");
         return stabilizedThis.map((el, index) => {
 
             markers[el[1]].setLabel(numToSSColumn(index + 1))
@@ -443,10 +445,10 @@ const Map = (props) => {
                                     click={(e) => clickHandler(index, item)}
                                     {...item}
                                     index={numToSSColumn(index + 1)}
-                                    name={item.name}
-                                    vicinity={item.vicinity}
-                                    rating={item.rating ? item.rating : 0}
-                                    distance={item.distance}
+                                    name={item.Name}
+                                    vicinity={item.Address}
+                                    rating={item.TotalRate ? item.TotalRate : 0}
+                                    distance={item.Distance}
                                     selected={item.selected}
                                 />
                             })}
@@ -475,11 +477,11 @@ const Map = (props) => {
                 {(results !== null && <DetailItem
                     // name={results[selectedIndex].name}
                     // address={results[selectedIndex].vicinity}
-                    phone_number='now on test'
+                    // phone_number={results[selectedIndex].PhoneNumber} _NEW
                     // distance={results[selectedIndex].distance}
                     // total_rate={results[selectedIndex].rating ? results[selectedIndex].rating : 0}
-                    distance_rate='now on test'
-                    taste_rate='now on test'
+                    // distance_rate={results[selectedIndex].DistanceRate} _NEW
+                    // taste_rate={results[selectedIndex].TasteRate} _NEW
                     {...results[selectedIndex]}
                     clickBtn={() => dialogOpen()}
                     reviews = {reviews}
@@ -638,7 +640,7 @@ const DetailItem = (props) => {
                                 NAME
                             </TableCell>
                             <TableCell>
-                                {props.name}
+                                {props.Name}
                             </TableCell>
                         </TableRow>
 
@@ -648,7 +650,7 @@ const DetailItem = (props) => {
                             </TableCell>
                             <TableCell>
                                 {/* {props.address} */}
-                                {props.vicinity}
+                                {props.Address}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -656,7 +658,7 @@ const DetailItem = (props) => {
                                 PHONE<br />NUMBER
                             </TableCell>
                             <TableCell>
-                                {props.phone_number}
+                                {props.PhoneNumber}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -664,7 +666,7 @@ const DetailItem = (props) => {
                                 DISTANCE
                             </TableCell>
                             <TableCell>
-                                {props.distance >= 1000 ? Math.round((props.distance) / 100) / 10 + 'km' : props.distance + 'm'}
+                                {props.Distance >= 1000 ? Math.round((props.Distance) / 100) / 10 + 'km' : props.Distance + 'm'}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -672,8 +674,8 @@ const DetailItem = (props) => {
                                 TOTAL<br />RATE
                             </TableCell>
                             <TableCell>
-                                {/* {props.total_rate} */}
-                                {props.rating}
+                                {props.TotalRate}
+                                {/* {props.rating} */}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -681,7 +683,7 @@ const DetailItem = (props) => {
                                 ACCESSIBILITY<br />RATE
                             </TableCell>
                             <TableCell>
-                                {props.distance_rate}
+                                {props.DistanceRate}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -689,7 +691,7 @@ const DetailItem = (props) => {
                                 TASTE<br />RATE
                             </TableCell>
                             <TableCell>
-                                {props.taste_rate}
+                                {props.TasteRate}
                             </TableCell>
                         </TableRow>
                     </TableBody>
