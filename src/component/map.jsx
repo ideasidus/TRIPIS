@@ -222,12 +222,12 @@ const Map = (props) => {
 
     const clickHandler = (index, place) => {
 
-        mapState.panTo(place.geometry.location)
+        mapState.panTo({lat: place.Latitude, lng: place.Longitude})
         // setResults((prev) => prev.map((v, i) => ({
         //     ...v, selected: (v.place_id === place.place_id ? true : false)
         // })))
         setResults((prev) => prev.map((v, i) => {
-            if (v.place_id === place.place_id) {
+            if (v.PlaceID === place.PlaceID) {
                 setSelectedIndex(i)
                 return {
                     ...v, selected : true
@@ -548,8 +548,8 @@ const SortTableHead = (props) => {
     const headCells = [
         { id: 'index', label: 'index', sort: true },
         { id: 'name', label: 'name', sort: false },
-        { id: 'rating', label: 'rating', sort: true },
-        { id: 'distance', label: 'distance', sort: true },
+        { id: 'TotalRate', label: 'rating', sort: true },
+        { id: 'Distance', label: 'distance', sort: true },
     ]
 
     const createSortHandler = (property) => (event) => {
