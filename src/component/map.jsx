@@ -277,9 +277,6 @@ const Map = (props) => {
             if (order !== 0) return order;
             return a[1] - b[1];
         });
-        console.log("여기야 여기!");
-        console.log(stabilizedThis);
-        console.log("여기까지!");
         return stabilizedThis.map((el, index) => {
 
             markers[el[1]].setLabel(numToSSColumn(index + 1))
