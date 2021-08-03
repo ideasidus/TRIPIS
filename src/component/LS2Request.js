@@ -1,5 +1,7 @@
 import LS2Request from "@enact/webos/LS2Request";
 
+
+
 const getRestaurant = () => {
     // find restaurant recommended by host
     let recommend = new Promise((resolve, reject) => {
@@ -58,7 +60,22 @@ const getRestaurant = () => {
 
 
     return Promise.all([recommend, notRecommend]).then((results) => {
-        // console.log('promise all results', results)
+
+        // for test
+        // return [{status: 'success', data: [{
+        //     Address: 'Test Address', AveragePrice: 100, Distance: 1500, 
+        //     DistanceRate:2, HostRecommendation: true, Latitude: 40.759,
+        //     Longitude: -73.996, Name: 'Test Name', NumberOFCustomer: 8,
+        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJc87lok1YwokRJzddYNyu9Ys',
+        //     TasterRate:3.5, TotalRate:3.2
+        // }, {
+        //     Address: 'Test Address2', AveragePrice: 100, Distance: 1500, 
+        //     DistanceRate:2, HostRecommendation: true, Latitude: 40.762,
+        //     Longitude: -73.99658, Name: 'Test Name', NumberOFCustomer: 8,
+        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJc87lok1YwokRJzddYNyu9Ys',
+        //     TasterRate:3.5, TotalRate:3.2
+        // }]}, []]
+
         return results
     })
 
