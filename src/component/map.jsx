@@ -8,15 +8,14 @@ import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
-import { getRestaurant as LS2getRestaurant } from "./LS2Request";
-import LS2Request from "@enact/webos/LS2Request";
+import { findRestaurant as LS2getRestaurant} from "../LS2Request/Find";
 
-import GoogleMapReact from "google-map-react";
-import axios from "axios";
+// import GoogleMapReact from "google-map-react";
+// import axios from "axios";
 
-import { Loader } from 'google-maps';
+// import { Loader } from 'google-maps';
 
-import SearchInput from "./searchInput";
+// import SearchInput from "./searchInput";
 
 /* eslint-disable no-undef */
 
@@ -158,9 +157,10 @@ const Map = (props) => {
 
     const createMarker = (place, index) => {
         
+        console.log('in createMarker',place, index)
         const marker = new google.maps.Marker({
             map: map,
-            position: {lat: place.Latitude, lng: place.Lontitude},
+            position: {lat: place.Latitude, lng: place.Longitude},
             label: numToSSColumn(index + 1),
         });
 
@@ -172,7 +172,7 @@ const Map = (props) => {
         marker.addListener('click', () => {
             // clickHandler(index, place)
             setMapState((prev) => map)
-            map.panTo(place.geometry.location)
+            map.panTo({lat: place.Latitude, lng: place.Longitude})
             setResults((prev) => prev !== null && prev.map((v, i) => ({
                 ...v, selected: (i === index ? true : false)
             })))
@@ -305,24 +305,50 @@ const Map = (props) => {
 
     useEffect(() => {
         const initRestaurant = () => {
-            LS2getRestaurant().then(results => {
-                console.log('getLS2Restaurant results',results)
+            LS2getRestaurant().then(async (db_results) => {
+                console.log('getLS2Restaurant results',db_results)
 
-                const [recommend, notRecommend] = results;
+                const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => Object.assign({}, item, {selected: false})) : [] 
+                const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => Object.assign({}, item, {selected: false})) : []
+                
+                console.log('rec',recommend)
+                console.log('not',notRecommend)
+                return await recommend.concat(notRecommend);
+            }).then((totalRestaurant) => {
+                console.log('totalRestaurant', totalRestaurant)
 
-                if ( recommend.status && recommend.status === 'success') {
-                    setResults((prev) => recommend.data.map((item) => (
-                            Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                    )));
+                let tAllMarkers = [];
+                for (let i = 0; i < totalRestaurant.length; i++) {
+                    var marker = createMarker(totalRestaurant[i], i);
+                    tAllMarkers.push(marker);
                 }
-                if (notRecommend.status && notRecommend.status === 'success') {
-                    setResults((prev) => prev.concat(notRecommend.data.map((item) => (
-                        Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                    ))) );
+
+                console.log('in initRestaurant', tAllMarkers)
+                setMarkers((prev) => tAllMarkers);
+                setResults((prev) => totalRestaurant);
+
+                if (totalRestaurant[0].Latitude != null && totalRestaurant[0].Longitube != null) {
+                    map.setCenter({lat: totalRestaurant[0].Latitude, lng: totalRestaurant[0].Longitube});
                 }
-            }).then(() => {
-                results.map((item, index) => createMarker(item, index) )
+
+                return;
             })
+            // .then(() => {
+            //     let tAllMarkers = [];
+            //     for (let i = 0; i < results.length; i++) {
+            //         var marker = createMarker(results[i], i);
+            //         tAllMarkers.push(marker);
+            //     }
+
+            //     console.log('in initRestaurant', tAllMarkers)
+            //     setMarkers((prev) => tAllMarkers);
+
+
+            //     if (results[0].Latitude != null && results[0].Longitube != null) {
+            //         map.setCenter({lat: results[0].Latitude, lng: results[0].Longitube});
+            //     }
+
+            // })
         }
 
         const initMap = () => {
@@ -350,11 +376,9 @@ const Map = (props) => {
                 map: map,
             });
 
+            initRestaurant();
             // getDumiRestaurant(request_type)
         }
-
-
-        initRestaurant()
         initMap()
         // setMapState((prev) => map)
 
