@@ -158,9 +158,10 @@ const Map = (props) => {
 
     const createMarker = (place, index) => {
         
+        console.log('in createMarker',place, index)
         const marker = new google.maps.Marker({
             map: map,
-            position: {lat: place.Latitude, lng: place.Lontitude},
+            position: {lat: place.Latitude, lng: place.Longitude},
             label: numToSSColumn(index + 1),
         });
 
@@ -172,7 +173,7 @@ const Map = (props) => {
         marker.addListener('click', () => {
             // clickHandler(index, place)
             setMapState((prev) => map)
-            map.panTo(place.geometry.location)
+            map.panTo({lat: place.Latitude, lng: place.Longitude})
             setResults((prev) => prev !== null && prev.map((v, i) => ({
                 ...v, selected: (i === index ? true : false)
             })))
@@ -277,7 +278,9 @@ const Map = (props) => {
             if (order !== 0) return order;
             return a[1] - b[1];
         });
-
+        console.log("여기야 여기!");
+        console.log(stabilizedThis);
+        console.log("여기까지!");
         return stabilizedThis.map((el, index) => {
 
             markers[el[1]].setLabel(numToSSColumn(index + 1))
@@ -305,24 +308,50 @@ const Map = (props) => {
 
     useEffect(() => {
         const initRestaurant = () => {
-            LS2getRestaurant().then(results => {
-                console.log('getLS2Restaurant results',results)
+            LS2getRestaurant().then(async (db_results) => {
+                console.log('getLS2Restaurant results',db_results)
 
-                const [recommend, notRecommend] = results;
+                const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => Object.assign({}, item, {selected: false})) : [] 
+                const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => Object.assign({}, item, {selected: false})) : []
+                
+                console.log('rec',recommend)
+                console.log('not',notRecommend)
+                return await recommend.concat(notRecommend);
+            }).then((totalRestaurant) => {
+                console.log('totalRestaurant', totalRestaurant)
 
-                if ( recommend.status && recommend.status === 'success') {
-                    setResults((prev) => recommend.data.map((item) => (
-                            Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                    )));
+                let tAllMarkers = [];
+                for (let i = 0; i < totalRestaurant.length; i++) {
+                    var marker = createMarker(totalRestaurant[i], i);
+                    tAllMarkers.push(marker);
                 }
-                if (notRecommend.status && notRecommend.status === 'success') {
-                    setResults((prev) => prev.concat(notRecommend.data.map((item) => (
-                        Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                    ))) );
+
+                console.log('in initRestaurant', tAllMarkers)
+                setMarkers((prev) => tAllMarkers);
+                setResults((prev) => totalRestaurant);
+
+                if (totalRestaurant[0].Latitude != null && totalRestaurant[0].Longitube != null) {
+                    map.setCenter({lat: totalRestaurant[0].Latitude, lng: totalRestaurant[0].Longitube});
                 }
-            }).then(() => {
-                results.map((item, index) => createMarker(item, index) )
+
+                return;
             })
+            // .then(() => {
+            //     let tAllMarkers = [];
+            //     for (let i = 0; i < results.length; i++) {
+            //         var marker = createMarker(results[i], i);
+            //         tAllMarkers.push(marker);
+            //     }
+
+            //     console.log('in initRestaurant', tAllMarkers)
+            //     setMarkers((prev) => tAllMarkers);
+
+
+            //     if (results[0].Latitude != null && results[0].Longitube != null) {
+            //         map.setCenter({lat: results[0].Latitude, lng: results[0].Longitube});
+            //     }
+
+            // })
         }
 
         const initMap = () => {
@@ -350,11 +379,9 @@ const Map = (props) => {
                 map: map,
             });
 
+            initRestaurant();
             // getDumiRestaurant(request_type)
         }
-
-
-        initRestaurant()
         initMap()
         // setMapState((prev) => map)
 
@@ -419,10 +446,10 @@ const Map = (props) => {
                                     click={(e) => clickHandler(index, item)}
                                     {...item}
                                     index={numToSSColumn(index + 1)}
-                                    name={item.name}
-                                    vicinity={item.vicinity}
-                                    rating={item.rating ? item.rating : 0}
-                                    distance={item.distance}
+                                    name={item.Name}
+                                    vicinity={item.Address}
+                                    rating={item.TotalRate ? item.TotalRate : 0}
+                                    distance={item.Distance}
                                     selected={item.selected}
                                 />
                             })}
@@ -451,11 +478,11 @@ const Map = (props) => {
                 {(results !== null && <DetailItem
                     // name={results[selectedIndex].name}
                     // address={results[selectedIndex].vicinity}
-                    phone_number='now on test'
+                    // phone_number={results[selectedIndex].PhoneNumber} _NEW
                     // distance={results[selectedIndex].distance}
                     // total_rate={results[selectedIndex].rating ? results[selectedIndex].rating : 0}
-                    distance_rate='now on test'
-                    taste_rate='now on test'
+                    // distance_rate={results[selectedIndex].DistanceRate} _NEW
+                    // taste_rate={results[selectedIndex].TasteRate} _NEW
                     {...results[selectedIndex]}
                     clickBtn={() => dialogOpen()}
                     reviews = {reviews}
@@ -614,7 +641,7 @@ const DetailItem = (props) => {
                                 NAME
                             </TableCell>
                             <TableCell>
-                                {props.name}
+                                {props.Name}
                             </TableCell>
                         </TableRow>
 
@@ -624,7 +651,7 @@ const DetailItem = (props) => {
                             </TableCell>
                             <TableCell>
                                 {/* {props.address} */}
-                                {props.vicinity}
+                                {props.Address}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -632,7 +659,7 @@ const DetailItem = (props) => {
                                 PHONE<br />NUMBER
                             </TableCell>
                             <TableCell>
-                                {props.phone_number}
+                                {props.PhoneNumber}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -640,7 +667,7 @@ const DetailItem = (props) => {
                                 DISTANCE
                             </TableCell>
                             <TableCell>
-                                {props.distance >= 1000 ? Math.round((props.distance) / 100) / 10 + 'km' : props.distance + 'm'}
+                                {props.Distance >= 1000 ? Math.round((props.Distance) / 100) / 10 + 'km' : props.Distance + 'm'}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -648,8 +675,8 @@ const DetailItem = (props) => {
                                 TOTAL<br />RATE
                             </TableCell>
                             <TableCell>
-                                {/* {props.total_rate} */}
-                                {props.rating}
+                                {props.TotalRate}
+                                {/* {props.rating} */}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -657,7 +684,7 @@ const DetailItem = (props) => {
                                 ACCESSIBILITY<br />RATE
                             </TableCell>
                             <TableCell>
-                                {props.distance_rate}
+                                {props.DistanceRate}
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -665,7 +692,7 @@ const DetailItem = (props) => {
                                 TASTE<br />RATE
                             </TableCell>
                             <TableCell>
-                                {props.taste_rate}
+                                {props.TasteRate}
                             </TableCell>
                         </TableRow>
                     </TableBody>
