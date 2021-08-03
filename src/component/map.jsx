@@ -125,7 +125,7 @@ const Map = (props) => {
 
     const [selectedIndex, setSelectedIndex] = useState(0);
 
-    const createMarker = (place, index) => {
+    const createMarkerDumi = (place, index) => {
         if (!place.geometry || !place.geometry.location) return;
         const marker = new google.maps.Marker({
             map: map,
@@ -156,6 +156,36 @@ const Map = (props) => {
         return marker;
     }
 
+    const createMarker = (place, index) => {
+        
+        const marker = new google.maps.Marker({
+            map: map,
+            position: {lat: place.Latitude, lng: place.Lontitude},
+            label: numToSSColumn(index + 1),
+        });
+
+        google.maps.event.addListener(marker, "click", () => {
+            infowindow.setContent(place.name || "");
+            infowindow.open(map);
+        });
+
+        marker.addListener('click', () => {
+            // clickHandler(index, place)
+            setMapState((prev) => map)
+            map.panTo(place.geometry.location)
+            setResults((prev) => prev !== null && prev.map((v, i) => ({
+                ...v, selected: (i === index ? true : false)
+            })))
+            setOpenDetail(true)
+        })
+
+        if (index == 0) {
+            google.maps.event.trigger(marker, 'click');
+        }
+
+        return marker;
+    }
+
     const getDumiRestaurant = (request_type) => {
         const request = {
             location: location,
@@ -168,7 +198,7 @@ const Map = (props) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                 let tAllMarkers = [];
                 for (let i = 0; i < results.length; i++) {
-                    var marker = createMarker(results[i], i);
+                    var marker = createMarkerDumi(results[i], i);
                     tAllMarkers.push(marker);
                 }
 
@@ -290,6 +320,8 @@ const Map = (props) => {
                         Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
                     ))) );
                 }
+            }).then(() => {
+                results.map((item, index) => createMarker(item, index) )
             })
         }
 
