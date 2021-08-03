@@ -1,17 +1,18 @@
 import { useState, Fragment } from 'react'
 import ClearIcon from '@material-ui/icons/Clear';
 import SearchIcon from '@material-ui/icons/Search';
+import UpdateIcon from '@material-ui/icons/Update';
 
 import { useSnackbar } from 'notistack';
 
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, IconButton, Divider, InputBase, Button, CircularProgress } from '@material-ui/core';
+import { Paper, IconButton, Divider, InputBase, Button, CircularProgress, Toolbar, Tooltip, Typography } from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid';
 import { useEffect } from 'react';
 
 import { DetailItem } from './map';
 
-import { getRestaurant as LS2getRestaurant } from "./LS2Request";
+import { getRestaurant as LS2getRestaurant, putRestaurant } from "./LS2Request";
 
 const useStyles = makeStyles((theme) => ({
     listSection: {
@@ -57,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
         minWidth: 400,
         display: 'none',
     },
+    UpdateListToolBarTitle: {
+        flex: '1 1 100%',
+    },
 }))
 
 /* eslint-disable no-undef */
@@ -78,7 +82,9 @@ const AdminMap = (props) => {
     const [input, setInput] = useState('');
     const [markers, setMarkers] = useState([]);
     const [center, setCenter] = useState(getCenter())
+
     const [search, setSearch] = useState([]);
+    const [selection, setSelection] = useState();
 
     const [serviceState, setServiceState] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -354,7 +360,7 @@ const AdminMap = (props) => {
             const [recommend, notRecommend] = results;
             const sumList = recommend.data.concat(notRecommend.data)
 
-            setSearch((prev) => prev.filter( x => !sumList.includes(x)))
+            setSearch((prev) => prev.filter(x => !sumList.includes(x)))
         })
 
         setLoading(false);
@@ -439,9 +445,11 @@ const AdminMap = (props) => {
     useEffect(() => {
         console.log('search changed', search)
     }, [search])
-    useEffect(() => {
-        console.log('loading changed', loading)
-    }, [loading])
+    // useEffect(() => {
+    //     console.log('loading changed', loading)
+    // }, [loading])
+
+
 
     return (
         <div style={{ display: 'flex' }}>
@@ -463,14 +471,16 @@ const AdminMap = (props) => {
                     </IconButton>
                 </Paper>
 
-                <Button variant="contained" color="primary">
+                {/* <Button variant="contained" color="primary">
                     {loading && <CircularProgress color="secondary" />}
                     {loading ? 'Loading...' : `Update All!! (${search.length})`}
-                </Button>
+                </Button> */}
 
                 <UpdateList
-                    rows={loading ? [] 
-                        : search.map((item => (({ place_id, name, rating, vicinity }) => ({ id:place_id, name, rating, vicinity }))(item)))
+                    setSelection={() => setSelection()}
+                    loading={loading}
+                    rows={loading ? []
+                        : search.map((item => (({ place_id, name, rating, vicinity, ...item }) => ({ id: place_id, name, rating, vicinity, ...item }))(item)))
                     }
                 >
                 </UpdateList>
@@ -490,7 +500,7 @@ const AdminMap = (props) => {
                     distance_rate={5}
                     taste_rate={3.4}
                     btnName='Recommend!'
-                    clickBtn={() => {console.log('click recommend!')}}
+                    clickBtn={() => { console.log('click recommend!') }}
                     reviews={[]}
                 />
             </div>
@@ -500,35 +510,92 @@ const AdminMap = (props) => {
 
 const UpdateList = (props) => {
 
+    const { loading, rows } = props;
+    const [selectionModel, setSelectionModel] = useState([]);
+
     const columns = [
         { field: 'name', headerName: 'Name', width: '150' },
         { field: 'rating', headerName: 'Rating', width: '75' },
         { field: 'vicinity', headerName: 'Vicinity', width: '125' }
     ]
 
-    const rows = [
-        { id: 1, name: 'Snow', rating: 'Jon', vicinity: 35, test: 't' },
-        { id: 2, name: 'Lannister', rating: 'Cersei', vicinity: 42, test: 't' },
-        { id: 3, name: 'Lannister', rating: 'Jaime', vicinity: 45, test: 't' },
-        { id: 4, name: 'Stark', rating: 'Arya', vicinity: 16, test: 't' },
-        { id: 5, name: 'Targaryen', rating: 'Daenerys', vicinity: null, test: 't' },
-        { id: 6, name: 'Melisandre', rating: null, vicinity: 150, test: 't' },
-        { id: 7, name: 'Clifford', rating: 'Ferrara', vicinity: 44, test: 't' },
-        { id: 8, name: 'Frances', rating: 'Rossini', vicinity: 36, test: 't' },
-        { id: 9, name: 'Roxie', rating: 'Harvey', vicinity: 65, test: 't' },
-    ];
+    console.log('rows',rows)
+
+    // const dumiRows = [
+    //     { id: 1, name: 'Snow', rating: 'Jon', vicinity: 35, test: 't' },
+    //     { id: 2, name: 'Lannister', rating: 'Cersei', vicinity: 42, test: 't' },
+    //     { id: 3, name: 'Lannister', rating: 'Jaime', vicinity: 45, test: 't' },
+    //     { id: 4, name: 'Stark', rating: 'Arya', vicinity: 16, test: 't' },
+    //     { id: 5, name: 'Targaryen', rating: 'Daenerys', vicinity: null, test: 't' },
+    //     { id: 6, name: 'Melisandre', rating: null, vicinity: 150, test: 't' },
+    //     { id: 7, name: 'Clifford', rating: 'Ferrara', vicinity: 44, test: 't' },
+    //     { id: 8, name: 'Frances', rating: 'Rossini', vicinity: 36, test: 't' },
+    //     { id: 9, name: 'Roxie', rating: 'Harvey', vicinity: 65, test: 't' },
+    // ];
+
+    useEffect(() => {
+        console.log('selectionModel changed', selectionModel)
+    }, [selectionModel])
+
+    const handleUpdate = () => {
+        if (selectionModel) {
+            selectionModel.map((item) => {
+                const res = rows.find((element, index, array) => {
+                    return item === rows.id;
+                })
+                if (res !== undefined) {
+                    putRestaurant(res);
+                }
+            })
+        }
+    }
 
     return (
         <DataGrid
             pageSize={10}
-            rows={props.rows}
-            // rows={rows}
+            rows={rows}
+            loading={loading}
             columns={columns}
             checkboxSelection
-            disableSelectionOnClick
+
+            onSelectionModelChange={(newSelection) => {
+                setSelectionModel(newSelection);
+            }}
+            selectionModel={selectionModel}
+
+            components={{ Toolbar: UpdateListToolbar }}
+            componentsProps={{ toolbar: { selectionModel:selectionModel, handleUpdate: handleUpdate  } }}
+        // disableSelectionOnClick
         >
 
         </DataGrid>
+
+    )
+}
+
+const UpdateListToolbar = (props) => {
+    const classes = useStyles();
+    const { selectionModel, handleUpdate } = props;
+    const numSelected = selectionModel ? selectionModel.length : 0;
+
+    return (
+        <Toolbar>
+            {numSelected > 0 ? (
+                <Typography className={classes.UpdateListToolBarTitle}>{numSelected} selected</Typography>
+            ) : (
+                <Typography className={classes.UpdateListToolBarTitle}>Updateable List</Typography>
+            )}
+
+            {numSelected > 0 && (
+                <Tooltip title="Update">
+                    <IconButton onClick={handleUpdate}>
+                        <UpdateIcon />
+                    </IconButton>
+                </Tooltip>
+            )}
+
+        </Toolbar>
+
     )
 }
 
