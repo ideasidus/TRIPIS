@@ -366,13 +366,12 @@ const Map = (props) => {
                 let tempReviews = []
                 db_results[0].data.map((item, index) => {
                     tempReviews.push({
-                        index: parseInt(item["PlaceID"]),
+                        index: item["PlaceID"],
                         username: item["UserName"],
                         tasteRating: item["TasteRate"],
                         distanceRating: item["DistanceRate"],
                         overallRating: item["TotalRate"]
                     });
-                    console.log('tempReviews : ', tempReviews)
                 })
                 setReviews(reviews.concat(tempReviews))
                 console.log('review : ', reviews)
@@ -385,13 +384,12 @@ const Map = (props) => {
                 let tempReviews = []
                 db_results[0].data.map((item, index) => {
                     tempReviews.push({
-                        index: parseInt(item["PlaceID"]),
+                        index: item["PlaceID"],
                         username: item["UserName"],
                         tasteRating: item["TasteRate"],
                         distanceRating: item["DistanceRate"],
                         overallRating: item["TotalRate"]
                     });
-                    console.log('tempReviews : ', tempReviews)
                 })
                 setReviews(reviews.concat(tempReviews))
                 console.log('review : ', reviews)
@@ -448,7 +446,7 @@ const Map = (props) => {
 
     const addReviews = () => {
         const reviewData = {
-            "PlaceID": String(selectedIndex),
+            "PlaceID": results[selectedIndex].PlaceID,
             "UserName": userName,
             "Password": '1234',  // DummyData
             "TasteRate": tasteRating,
@@ -464,14 +462,13 @@ const Map = (props) => {
             putAttractionReview(reviewData)
         }
         setReviews(reviews.concat([{
-            index: selectedIndex,
+            index: results[selectedIndex].PlaceID,
             username: userName,
             tasteRating: tasteRating,
             distanceRating: distanceRating,
             overallRating: overallRating
         }]));
-
-        
+        setUserName('')
     }
 
     return (
@@ -554,6 +551,7 @@ const Map = (props) => {
                     clickBtn={() => dialogOpen()}
                     reviews = {reviews}
                     selectedIndex = {selectedIndex}
+                    selectedID = {selectedIndex}
                     btnName="Rate!"
                 />)}
             </div>
@@ -785,7 +783,7 @@ const DetailItem = (props) => {
                     </TableHead>
                     <TableBody>
                         {props.reviews !== [] && props.reviews.map((item, index) => {
-                            if (item.index == props.selectedIndex) {
+                            if (item.index == props.PlaceID) {
                                 return <ReviewItem
                                 username = {item.username}
                                 tasteRating = {item.tasteRating}

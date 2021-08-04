@@ -203,19 +203,19 @@ export const findRestaurantReview = () => {
 
     return Promise.all([reviewData]).then((results) => {
         // return [{status: 'success', data: [{
-        //     "PlaceID": "0",
+        //     "PlaceID": "ChIJyychK8XjZTURs6UKGVhF1-s",
         //     "UserName": "asdf",
         //     "TasteRate": "5",
         //     "DistanceRate": "4",
         //     "TotalRate": "3"
         // },{
-        //     "PlaceID": "0",
+        //     "PlaceID": "ChIJyychK8XjZTURs6UKGVhF1-s",
         //     "UserName": "zxcv",
         //     "TasteRate": "3",
         //     "DistanceRate": "4",
         //     "TotalRate": "5"
         // },{
-        //     "PlaceID": "1",
+        //     "PlaceID": "ChIJgd5ZPcTjZTURhIDk2qKpq5A",
         //     "UserName": "qwerty",
         //     "TasteRate": "1",
         //     "DistanceRate": "1",
