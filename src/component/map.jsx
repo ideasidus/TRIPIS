@@ -8,8 +8,8 @@ import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
-import { findRestaurant as LS2getRestaurant, findRestaurantReview} from "../LS2Request/Find";
-import { putRestaurantReview } from "../LS2Request/Put";
+import { findRestaurant as LS2getRestaurant, findRestaurantReview, findAttractionReview} from "../LS2Request/Find";
+import { putRestaurantReview, putAttractionReview } from "../LS2Request/Put";
 
 // import GoogleMapReact from "google-map-react";
 // import axios from "axios";
@@ -352,7 +352,26 @@ const Map = (props) => {
 
         const initRestaurantReview = () => {
             findRestaurantReview().then(async (db_results) => {
-                console.log('getLS2RestaurantReview results',db_results)
+                console.log('getRestaurantReview results',db_results)
+                let tempReviews = []
+                db_results[0].data.map((item, index) => {
+                    tempReviews.push({
+                        index: parseInt(item["PlaceID"]),
+                        username: item["UserName"],
+                        tasteRating: item["TasteRate"],
+                        distanceRating: item["DistanceRate"],
+                        overallRating: item["TotalRate"]
+                    });
+                    console.log('tempReviews : ', tempReviews)
+                })
+                setReviews(reviews.concat(tempReviews))
+                console.log('review : ', reviews)
+            })
+        }
+
+        const initAttractionReview = () => {
+            findAttractionReview().then(async (db_results) => {
+                console.log('getAttractionReview results',db_results)
                 let tempReviews = []
                 db_results[0].data.map((item, index) => {
                     tempReviews.push({
@@ -396,7 +415,11 @@ const Map = (props) => {
 
             initRestaurant();
             // getDumiRestaurant(request_type)
-            initRestaurantReview();
+            if (request_type == 'restaurant')
+                initRestaurantReview();
+            if (request_type == 'tourist_attraction')
+                initAttractionReview();
+
         }
         initMap()
         // setMapState((prev) => map)
@@ -415,18 +438,21 @@ const Map = (props) => {
 
     const addReviews = () => {
         const reviewData = {
-            "PlaceID":String(selectedIndex),
-            "UserName":userName,
-            "Password":'1234',
-            "TasteRate":tasteRating,
-            "DistanceRate":distanceRating,
-            "TotalRate":overallRating,
-            "TotalPrice":19900,
-            "NumberOfCustomer":2,
+            "PlaceID": String(selectedIndex),
+            "UserName": userName,
+            "Password": '1234',  // DummyData
+            "TasteRate": tasteRating,
+            "DistanceRate": distanceRating,
+            "TotalRate": overallRating,
+            "TotalPrice": 19900,  // DummyData
+            "NumberOfCustomer": 2,  // DummyData
         }
-
-        putRestaurantReview(reviewData)  // add to Database
-
+        if (request_type == 'restaurant') {
+            putRestaurantReview(reviewData)  // add to Database
+        }
+        else if (request_type == 'tourist_attraction') {
+            putAttractionReview(reviewData)
+        }
         setReviews(reviews.concat([{
             index: selectedIndex,
             username: userName,
@@ -434,6 +460,8 @@ const Map = (props) => {
             distanceRating: distanceRating,
             overallRating: overallRating
         }]));
+
+        
     }
 
     return (

@@ -61,19 +61,19 @@ export const findRestaurant = () => {
     return Promise.all([recommend, notRecommend]).then((results) => {
 
         // for test
-        // return [{status: 'success', data: [{
-        //     Address: 'Test Address', AveragePrice: 100, Distance: 1000, 
-        //     DistanceRate:2, HostRecommendation: true, Latitude: 35.8709543,
-        //     Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
-        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
-        //     TasterRate:3.5, TotalRate:4
-        // }, {
-        //     Address: 'Test Address2', AveragePrice: 100, Distance: 1500, 
-        //     DistanceRate:2, HostRecommendation: true, Latitude: 35.8674918,
-        //     Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
-        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
-        //     TasterRate:3.5, TotalRate:3.2
-        // }]}, []]
+        return [{status: 'success', data: [{
+            Address: 'Test Address', AveragePrice: 100, Distance: 1000, 
+            DistanceRate:2, HostRecommendation: true, Latitude: 35.8709543,
+            Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
+            NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
+            TasterRate:3.5, TotalRate:4
+        }, {
+            Address: 'Test Address2', AveragePrice: 100, Distance: 1500, 
+            DistanceRate:2, HostRecommendation: true, Latitude: 35.8674918,
+            Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
+            NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
+            TasterRate:3.5, TotalRate:3.2
+        }]}, []]
 
         return results
     })
@@ -126,6 +126,31 @@ export const findRestaurantReview = () => {
         //     "DistanceRate": "1",
         //     "TotalRate": "1"
         // }]}, []]
+        console.log(results)
+        return results
+    })
+}
+
+export const findAttractionReview = () => {
+    let reviewData = new Promise((resolve, reject) => {
+        new LS2Request().send({
+            service: 'com.webos.service.db',
+            method: 'find',
+            parameters: {
+                "query": {
+                    "from": "com.trip.info:5"
+                },
+            },
+            onSuccess: (res) => {
+                resolve({ status: 'success', data: res.results })
+            },
+            onFailure: (res) => {
+                resolve({ status: 'fail', data: [] })
+            }
+        })
+    })
+
+    return Promise.all([reviewData]).then((results) => {
         console.log(results)
         return results
     })
