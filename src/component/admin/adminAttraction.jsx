@@ -20,6 +20,11 @@ import haversine from 'haversine-distance'
 import { TabContext, TabList, TabPanel } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'flex',
+        background: 'white',
+    },
+
     listSection: {
         width: '20vw', minWidth: 400, height: '100vh', overflowY: 'auto',
     },
@@ -154,7 +159,6 @@ const AdminAttraction = (props) => {
             center: { lat: center.Latitude, lng: center.Longitude },
             zoom: 15,
         })
-
         location = new google.maps.LatLng(center.Latitude, center.Longitude)
         service = new google.maps.places.PlacesService(map);
         infowindow = new google.maps.InfoWindow()
@@ -514,7 +518,7 @@ const AdminAttraction = (props) => {
 
 
     return (
-        <div style={{ display: 'flex' }}>
+        <div className={classes.root}>
             <div className={classes.listSection}>
                 <Paper className={classes.inputPaper}>
                     <InputBase

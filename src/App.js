@@ -58,7 +58,7 @@ const App = () => {
     const getCenter = findCenter().then((result) => {
       if (result.status === 'success') {
         console.log('success center', result)
-        setCenter(result.data);
+        setCenter(result.data[0]);
       } else {
         setCenter(null)
       }
