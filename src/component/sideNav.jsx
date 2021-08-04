@@ -49,6 +49,8 @@ const SideNav = (props) => {
                 history.push('/admin/attraction')
             } else if (key === 'event') {
                 history.push('/admin/event')
+            } else if (key === 'main') {
+                history.push('/restaurant')
             }
         } else {
             if (key === 'restaurant') {
@@ -59,6 +61,8 @@ const SideNav = (props) => {
                 history.push('/event')
             } else if (key === 'admin') {
                 history.push('/admin')
+            } else if (key === 'main') {
+                history.push('/restaurant')
             }
         }
 
@@ -89,7 +93,7 @@ const SideNav = (props) => {
                         marginTop: '15px'
                     }}
                 >
-                    <a href="/#/restaurant">TRIPIS</a>
+                    <a onClick={(e) => clickHandler('main')}>TRIPIS</a>
                 </div>
             </SidebarHeader>
             <SidebarContent className={classes.content}>
