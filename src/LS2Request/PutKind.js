@@ -330,4 +330,40 @@ export const putKindALL = (obj) => {
             console.log('\t',res);
         }
       })
+
+      new LS2Request().send({
+        service: 'com.webos.service.db',
+        method: 'putKind',
+        parameters: {
+            "id":"com.trip.info:6",
+            "owner":"com.tripis.app", 
+            "schema": {
+                "type":"object",
+                "properties": {
+                    "PlaceID":{"type":"string"},
+                    "Name":{"type":"string"},
+                    "Latitude":{"type":"number"},
+                    "Longitude":{"type":"number"},
+                    "Address":{"type":"string"},
+                    "PhoneNumber":{"type":"string"},
+                }
+            },
+            "indexes":[
+                {
+                    "name":"indexPlaceID",
+                    "props":[{"name":"PlaceID"}]
+                },
+                {
+                    "name":"indexName",
+                    "props":[{"name":"Name"}]
+                }
+            ]
+        },
+        onSuccess: (res) => {
+            console.log('\t',res.results);
+        },
+        onFailure: (res) => {
+            console.log('\t',res);
+        }
+    })
 }

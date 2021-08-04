@@ -14,7 +14,9 @@ import { DetailItem } from '../map';
 
 import { findAttraction as LS2FindAttraction, findCenter } from '../../LS2Request/Find';
 import { putAttraction } from '../../LS2Request/Put';
-import AdminAttraction from './adminAttraction';
+import { useHistory } from 'react-router-dom';
+
+import haversine from 'haversine-distance'
 
 const useStyles = makeStyles((theme) => ({
     listSection: {
@@ -67,25 +69,17 @@ const useStyles = makeStyles((theme) => ({
 
 /* eslint-disable no-undef */
 
-const defaultCenter = { lat: 40.7483475, lng: -73.9864422 };
-
-const getCenter = () => {
-    // Select DB8 Code
-    return findCenter()
-
-    // return null
-    return { name: 'Test!!', lat: 35.8692386, lng: 128.5919156 }
-}
-
 const AdminAttraction = (props) => {
     let map, service, location, infowindow, geocoder, searchBox;
+    const { center } = props;
+    let history = useHistory();
+
     // let markers = [];
     const classes = useStyles()
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     const [input, setInput] = useState('');
     const [markers, setMarkers] = useState([]);
-    const [center, setCenter] = useState(getCenter())
 
     const [search, setSearch] = useState([]);
     const [selection, setSelection] = useState();
@@ -93,6 +87,8 @@ const AdminAttraction = (props) => {
     const [serviceState, setServiceState] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    console.log('in attraction')
+    
 
     const handleClear = () => {
         setInput('')
@@ -127,12 +123,7 @@ const AdminAttraction = (props) => {
             icon: svgMarker,
             map: map,
         })
-
-        if (!setting) {
-            showCenterInfoWindow(marker, name, lat, lng);
-            google.maps.event.addListener(marker, "click", () => showCenterInfoWindow(marker, name, lat, lng));
-        }
-
+        google.maps.event.addListener(marker, "click", () => showCenterInfoWindow(marker, name, lat, lng));
     }
 
     const showCenterInfoWindow = (marker, name, lat, lng) => {
@@ -141,32 +132,17 @@ const AdminAttraction = (props) => {
         nameEl.innerText = name;
         content.appendChild(nameEl);
 
-        let btnEl = document.createElement('button');
-        btnEl.innerText = '숙소로 등록하기'
-        btnEl.addEventListener('click', function () { setCenterPlace(lat, lng); })
-        content.appendChild(btnEl)
-
         infowindow.setContent(content);
         infowindow.open(map, marker);
     }
 
-    function setCenterPlace(lat, lng) {
-        console.log('setCenter', place)
-        // set db
-        setCenter({ lat: lat, lng: lng })
-        enqueueSnackbar('Set Center!!', { variant: 'success', autoHideDuration: 2000, action })
-        infowindow.close();
-    }
-
     const initMap = () => {
-        if (center !== null) {
-            console.log('center exist')
             map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: center.lat, lng: center.lng },
+                center: { lat: center.Latitude, lng: center.Longitude },
                 zoom: 15,
             })
 
-            location = new google.maps.LatLng(center.lat, center.lng)
+            location = new google.maps.LatLng(center.Latitude, center.Longitude)
             service = new google.maps.places.PlacesService(map);
             infowindow = new google.maps.InfoWindow()
 
@@ -174,74 +150,13 @@ const AdminAttraction = (props) => {
 
             infowindow.setContent()
 
-            centerMarker(center.name, center.lat, center.lng)
+            centerMarker(center.Name, center.Latitude, center.Longitude)
 
-            restaurantSearch(service, null);
-
-        } else {
-            console.log('center is null')
-            history.push('/admin')
-            // map = new google.maps.Map(document.getElementById("map"), {
-            //     center: { lat: defaultCenter.lat, lng: defaultCenter.lng },
-            //     zoom: 15,
-            // })
-
-            // location = new google.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
-            // service = new google.maps.places.PlacesService(map);
-            // infowindow = new google.maps.InfoWindow()
-
-            // console.log('in initMap serive', service)
-            // setServiceState(service)
-
-            // centerSearch();
-        }
+            attractionSearch(service, null);
     }
 
-    const centerSearch = () => {
-        const searchInputEl = document.getElementById('input');
-        const searchBox = new google.maps.places.SearchBox(searchInputEl);
 
-        map.addListener("bounds_changed", () => {
-            searchBox.setBounds(map.getBounds());
-        })
-
-        searchBox.addListener("places_changed", () => {
-            const places = searchBox.getPlaces();
-            console.log('places : ', places)
-
-            if (places.length === 0) {
-                return;
-            }
-
-            // clear marker
-            markers.forEach((marker) => {
-                marker.setMap(null);
-            });
-            setMarkers([]);
-
-            const bounds = new google.maps.LatLngBounds();
-            places.forEach((place) => {
-                if (!place.geometry || !place.geometry.location) {
-                    console.log('Returned place contains no geometry')
-                    return;
-                }
-                console.log('before centerMarker')
-                centerMarker(place.name, place.geometry.location.lat(), place.geometry.location.lng(), false)
-
-                // Info Window Section
-
-                if (place.geometry.viewport) {
-                    bounds.union(place.geometry.viewport);
-                } else {
-                    bounds.extend(place.geometry.location)
-                }
-            })
-            map.fitBounds(bounds)
-
-        })
-    }
-
-    const restaurantSearch = (service, pageToken) => {
+    const attractionSearch = (service, pageToken) => {
 
         if (!loading) {
             setLoading((prev) => !prev)
@@ -252,22 +167,22 @@ const AdminAttraction = (props) => {
 
         if (pageToken) {
             request = {
-                location: center,
+                location: {lat: center.Latitude, lng: center.Longitude},
                 radius: 2000,
-                type: 'restaurant',
+                type: 'tourist_attraction',
                 language: 'en',
                 pageToken: pageToken,
             };
         } else {
             console.log('init!!')
             request = {
-                location: center,
+                location: {lat: center.Latitude, lng: center.Longitude},
                 radius: 2000,
-                type: 'restaurant',
+                type: 'tourist_attraction',
                 language: 'en',
             };
         }
-
+        
         service.nearbySearch(request, (results, status, pagetoken) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                 if (tmpResult === null) {
@@ -290,43 +205,43 @@ const AdminAttraction = (props) => {
         })
     }
 
-    const initSearchBox = () => {
-        const searchInputEl = document.getElementById('input');
-        const searchBox = new google.maps.places.SearchBox(searchInputEl);
+    // const initSearchBox = () => {
+    //     const searchInputEl = document.getElementById('input');
+    //     const searchBox = new google.maps.places.SearchBox(searchInputEl);
 
-        map.addListener("bounds_changed", () => {
-            searchBox.setBounds(map.getBounds());
-        })
+    //     map.addListener("bounds_changed", () => {
+    //         searchBox.setBounds(map.getBounds());
+    //     })
 
-        searchBox.addListener("places_changed", () => {
-            const places = searchBox.getPlaces();
+    //     searchBox.addListener("places_changed", () => {
+    //         const places = searchBox.getPlaces();
 
-            if (places.length === 0) {
-                return;
-            }
+    //         if (places.length === 0) {
+    //             return;
+    //         }
 
-            // clear marker
-            markers.forEach((marker) => {
-                marker.setMap(null);
-            });
-            setMarkers([]);
+    //         // clear marker
+    //         markers.forEach((marker) => {
+    //             marker.setMap(null);
+    //         });
+    //         setMarkers([]);
 
-            const bounds = new google.maps.LatLngBounds();
-            places.forEach((place) => {
-                if (!place.geometry || !place.geometry.location) {
-                    return;
-                }
+    //         const bounds = new google.maps.LatLngBounds();
+    //         places.forEach((place) => {
+    //             if (!place.geometry || !place.geometry.location) {
+    //                 return;
+    //             }
 
-                if (place.geometry.viewport) {
-                    bounds.union(place.geometry.viewport);
-                } else {
-                    bounds.extend(place.geometry.location)
-                }
-            })
-            map.fitBounds(bounds)
+    //             if (place.geometry.viewport) {
+    //                 bounds.union(place.geometry.viewport);
+    //             } else {
+    //                 bounds.extend(place.geometry.location)
+    //             }
+    //         })
+    //         map.fitBounds(bounds)
 
-        })
-    }
+    //     })
+    // }
 
     const createMarker = (place, index) => {
         const marker = new google.maps.Marker({
@@ -364,8 +279,10 @@ const AdminAttraction = (props) => {
 
     const searchFiltering = (tmpResult) => {
         console.log('in searchFiltering', tmpResult)
+        console.log('print tmpResult', tmpResult[0].geometry.location.lat(),tmpResult[0].geometry.location.lng())
+        console.log('print tmpResult', tmpResult[1].geometry.location.lat(),tmpResult[1].geometry.location.lng())
 
-        LS2FindRestaurant().then(async (db_results) => {
+        LS2FindAttraction().then(async (db_results) => {
             const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => item.PlaceID) : []
             const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => item.PlaceID) : []
 
@@ -389,21 +306,74 @@ const AdminAttraction = (props) => {
         setLoading(false);
     }
 
+    const handleUpdate = (selectionModel) => {
+        console.log('click update btn')
+        console.log('markers?', markers)
+
+        if (selectionModel) {
+            let responseList = [];
+            let indexList = [];
+
+            async function updateCall(responseList, indexList) {
+                await selectionModel.map((item, i) => {
+                    let lastIndex = -1;
+
+                    const res = search.find((element, index, array) => {
+                        lastIndex = index;
+                        return item === element.place_id;
+                    })
+
+                    if (res !== undefined) {
+
+                        (x => {setTimeout(() => {
+                            console.log('500ms wait,,,', x)
+                            let request = {
+                                placeId: res.place_id,
+                                fields: ['name', 'formatted_address', 'place_id', 'geometry', 'formatted_phone_number']
+                            }
+                            serviceState.getDetails(request, (place, status) => {
+                                console.log('after getDetail', place, status)
+                                if (status === google.maps.places.PlacesServiceStatus.OK &&
+                                    place && place.geometry && place.geometry.location
+                                ) {
+                                    console.log('result place:', place)
+                                    putAttraction(
+                                        Object.assign(res, {
+                                            address: place.formatted_address, 
+                                            phone: place.formatted_phone_number, 
+                                            distance: Math.round(haversine([res.geometry.location.lng(), res.geometry.location.lat()], [center.lng, center.lat]))
+                                        }))
+                                }
+                            })
+                        }, 400*(x))})(i)
+                    }
+                })
+            }
+
+            updateCall(responseList, indexList);
+            
+            const tmp = search.slice();
+            const tmpMarker = markers.slice();
+
+            let tAllMarkers = [];
+            let i = 0;
+            markers.map((marker, index) => {
+                if (selectionModel.includes(tmp[index].place_id)) {
+                    marker.setMap(null);
+                } else {
+                    tAllMarkers.push(tmpMarker[index])
+                }
+            })
+            setMarkers(tAllMarkers)
+
+            setSearch((prev) => prev.filter(x => !selectionModel.includes(x.place_id)))
+        }
+    }
+
     useEffect(() => {
         initMap()
-        initSearchBox();
-
+        // initSearchBox();
     }, [])
-
-    useEffect(() => {
-        console.log('center changed', center)
-
-        if (center === null) {
-
-        } else {
-
-        }
-    }, [center])
 
     useEffect(() => {
         console.log('search changed', search, search.length)
@@ -430,12 +400,8 @@ const AdminAttraction = (props) => {
                 </Paper>
 
                 <UpdateList
-                    createMarker={createMarker}
-                    setMarkers={setMarkers}
+                    handleUpdate={handleUpdate}
                     markers={markers}
-                    search={search}
-                    setSearch={setSearch}
-                    setSelection={() => setSelection()}
                     loading={loading}
                     rows={loading ? []
                         : search.map((item => (({ place_id, name, rating, vicinity, ...item }) => ({ id: place_id, name, rating, vicinity, ...item }))(item)))
@@ -468,7 +434,7 @@ const AdminAttraction = (props) => {
 
 const UpdateList = (props) => {
 
-    const { loading, rows, setSearch, search, markers, setMarkers, createMarker } = props;
+    const { loading, rows, markers } = props;
     const [selectionModel, setSelectionModel] = useState([]);
 
     const columns = [
@@ -498,45 +464,7 @@ const UpdateList = (props) => {
     }, [selectionModel])
 
     const handleUpdate = () => {
-
-        if (selectionModel) {
-
-            let responseList = [];
-            let indexList = [];
-
-            async function updateCall(responseList, indexList) {
-                await selectionModel.map((item) => {
-                    let lastIndex = -1;
-
-                    const res = rows.find((element, index, array) => {
-                        lastIndex = index;
-                        return item === element.id;
-                    })
-
-                    if (res !== undefined) {
-                        putRestaurant(res).then((result) => {
-                        })
-                    }
-                })
-            }
-
-            updateCall(responseList, indexList);
-            const tmp = search.slice();
-            const tmpMarker = markers.slice();
-
-            let tAllMarkers = [];
-            let i = 0;
-            markers.map((marker, index) => {
-                if (selectionModel.includes(tmp[index].place_id)) {
-                    marker.setMap(null);
-                } else {
-                    tAllMarkers.push(tmpMarker[index])
-                }
-            })
-            setMarkers(tAllMarkers)
-
-            setSearch((prev) => prev.filter(x => !selectionModel.includes(x.place_id)))
-        }
+        props.handleUpdate(selectionModel)
     }
 
     return (
@@ -572,7 +500,7 @@ const UpdateListToolbar = (props) => {
             {numSelected > 0 ? (
                 <Typography className={classes.UpdateListToolBarTitle}>{numSelected} selected</Typography>
             ) : (
-                <Typography className={classes.UpdateListToolBarTitle}>Updateable List</Typography>
+                <Typography className={classes.UpdateListToolBarTitle}>Attraction Updateable List</Typography>
             )}
 
             {numSelected > 0 && (

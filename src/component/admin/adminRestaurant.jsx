@@ -128,11 +128,12 @@ const AdminMap = (props) => {
             icon: svgMarker,
             map: map,
         })
+        google.maps.event.addListener(marker, "click", () => showCenterInfoWindow(marker, name, lat, lng));
 
-        if (!setting) {
-            showCenterInfoWindow(marker, name, lat, lng);
-            google.maps.event.addListener(marker, "click", () => showCenterInfoWindow(marker, name, lat, lng));
-        }
+        // if (!setting) {
+        //     showCenterInfoWindow(marker, name, lat, lng);
+        //     google.maps.event.addListener(marker, "click", () => showCenterInfoWindow(marker, name, lat, lng));
+        // }
 
     }
 
@@ -149,59 +150,57 @@ const AdminMap = (props) => {
         nameEl.innerText = name;
         content.appendChild(nameEl);
 
-        let btnEl = document.createElement('button');
-        btnEl.innerText = '숙소로 등록하기'
-        btnEl.addEventListener('click', function () { setCenterPlace(lat, lng); })
-        content.appendChild(btnEl)
+        // let btnEl = document.createElement('button');
+        // btnEl.innerText = '숙소로 등록하기'
+        // btnEl.addEventListener('click', function () { setCenterPlace(lat, lng); })
+        // content.appendChild(btnEl)
 
         infowindow.setContent(content);
         infowindow.open(map, marker);
     }
 
-    function setCenterPlace(lat, lng) {
-        console.log('setCenter', place)
-        // set db
-        setCenter({ lat: lat, lng: lng })
-        enqueueSnackbar('Set Center!!', { variant: 'success', autoHideDuration: 2000, action })
-        infowindow.close();
-    }
+    // function setCenterPlace(lat, lng) {
+    //     console.log('setCenter', place)
+    //     // set db
+    //     setCenter({ lat: lat, lng: lng })
+    //     enqueueSnackbar('Set Center!!', { variant: 'success', autoHideDuration: 2000, action })
+    //     infowindow.close();
+    // }
 
     const initMap = () => {
-        if (center !== null) {
-            console.log('center exist')
-            map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: center.lat, lng: center.lng },
-                zoom: 15,
-            })
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: center.lat, lng: center.lng },
+            zoom: 15,
+        })
 
-            location = new google.maps.LatLng(center.lat, center.lng)
-            service = new google.maps.places.PlacesService(map);
-            infowindow = new google.maps.InfoWindow()
+        location = new google.maps.LatLng(center.lat, center.lng)
+        service = new google.maps.places.PlacesService(map);
+        infowindow = new google.maps.InfoWindow()
 
-            setServiceState((prev) => service)
+        setServiceState((prev) => service)
 
-            infowindow.setContent()
+        infowindow.setContent()
 
-            centerMarker(center.name, center.lat, center.lng)
+        centerMarker(center.name, center.lat, center.lng)
 
-            restaurantSearch(service, null);
+        restaurantSearch(service, null);
 
-        } else {
-            console.log('center is null')
-            map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: defaultCenter.lat, lng: defaultCenter.lng },
-                zoom: 15,
-            })
+        // } else {
+        //     console.log('center is null')
+        //     map = new google.maps.Map(document.getElementById("map"), {
+        //         center: { lat: defaultCenter.lat, lng: defaultCenter.lng },
+        //         zoom: 15,
+        //     })
 
-            location = new google.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
-            service = new google.maps.places.PlacesService(map);
-            infowindow = new google.maps.InfoWindow()
+        //     location = new google.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
+        //     service = new google.maps.places.PlacesService(map);
+        //     infowindow = new google.maps.InfoWindow()
 
-            console.log('in initMap serive', service)
-            setServiceState(service)
+        //     console.log('in initMap serive', service)
+        //     setServiceState(service)
 
-            centerSearch();
-        }
+        //     centerSearch();
+        // }
     }
 
     const centerSearch = () => {
@@ -463,30 +462,32 @@ const AdminMap = (props) => {
 
                     if (res !== undefined) {
 
-                        (x => {setTimeout(() => {
-                            console.log('500ms wait,,,', x)
-                            let request = {
-                                placeId: res.place_id,
-                                fields: ['name', 'formatted_address', 'place_id', 'geometry', 'formatted_phone_number']
-                            }
-                            serviceState.getDetails(request, (place, status) => {
-                                console.log('after getDetail', place, status)
-                                if (status === google.maps.places.PlacesServiceStatus.OK &&
-                                    place && place.geometry && place.geometry.location
-                                ) {
-                                    console.log('result place:', place)
-                                    putRestaurant(
-                                        Object.assign(res, {
-                                            address: place.formatted_address, 
-                                            phone: place.formatted_phone_number, 
-                                            distance: Math.round(haversine([res.geometry.location.lng(), res.geometry.location.lat()], [center.lng, center.lat]))
-                                        }))
+                        (x => {
+                            setTimeout(() => {
+                                console.log('500ms wait,,,', x)
+                                let request = {
+                                    placeId: res.place_id,
+                                    fields: ['name', 'formatted_address', 'place_id', 'geometry', 'formatted_phone_number']
                                 }
-                            })
-                        }, 400*(x))})(i)
+                                serviceState.getDetails(request, (place, status) => {
+                                    console.log('after getDetail', place, status)
+                                    if (status === google.maps.places.PlacesServiceStatus.OK &&
+                                        place && place.geometry && place.geometry.location
+                                    ) {
+                                        console.log('result place:', place)
+                                        putRestaurant(
+                                            Object.assign(res, {
+                                                address: place.formatted_address,
+                                                phone: place.formatted_phone_number,
+                                                distance: Math.round(haversine([res.geometry.location.lng(), res.geometry.location.lat()], [center.lng, center.lat]))
+                                            }))
+                                    }
+                                })
+                            }, 400 * (x))
+                        })(i)
 
-                        
-                        
+
+
                         // putRestaurant(res).then((result) => {
                         //     // console.log(result)
                         //     // if (result.status === 'test_success') {
@@ -499,7 +500,7 @@ const AdminMap = (props) => {
             }
 
             updateCall(responseList, indexList);
-            
+
             const tmp = search.slice();
             const tmpMarker = markers.slice();
             // markers.forEach((marker) => {
@@ -616,19 +617,9 @@ const AdminMap = (props) => {
 
     useEffect(() => {
         initMap()
-        initSearchBox();
+        // initSearchBox();
 
     }, [])
-
-    useEffect(() => {
-        console.log('center changed', center)
-
-        if (center === null) {
-
-        } else {
-
-        }
-    }, [center])
 
     useEffect(() => {
         console.log('search changed', search, search.length)
@@ -702,13 +693,7 @@ const AdminMap = (props) => {
 
                 <UpdateList
                     handleUpdate={handleUpdate}
-                    serviceState={serviceState}
-                    service={service}
-                    setMarkers={setMarkers}
                     markers={markers}
-                    search={search}
-                    setSearch={setSearch}
-                    setSelection={() => setSelection()}
                     loading={loading}
                     rows={loading ? []
                         : search.map((item => (({ place_id, name, rating, vicinity, ...item }) => ({ id: place_id, name, rating, vicinity, ...item }))(item)))
@@ -741,7 +726,7 @@ const AdminMap = (props) => {
 
 const UpdateList = (props) => {
 
-    const { loading, rows, setSearch, search, markers, setMarkers, service, serviceState } = props;
+    const { loading, rows, markers } = props;
     const [selectionModel, setSelectionModel] = useState([]);
 
     const columns = [
