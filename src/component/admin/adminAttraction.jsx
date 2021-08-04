@@ -10,10 +10,11 @@ import { Paper, IconButton, Divider, InputBase, Button, CircularProgress, Toolba
 import { DataGrid } from '@material-ui/data-grid';
 import { useEffect } from 'react';
 
-import { DetailItem } from './map';
+import { DetailItem } from '../map';
 
-import { findRestaurant as LS2FindRestaurant } from '../LS2Request/Find';
-import { putRestaurant } from '../LS2Request/Put';
+import { findAttraction as LS2FindAttraction, findCenter } from '../../LS2Request/Find';
+import { putAttraction } from '../../LS2Request/Put';
+import AdminAttraction from './adminAttraction';
 
 const useStyles = makeStyles((theme) => ({
     listSection: {
@@ -70,12 +71,13 @@ const defaultCenter = { lat: 40.7483475, lng: -73.9864422 };
 
 const getCenter = () => {
     // Select DB8 Code
+    return findCenter()
 
     // return null
     return { name: 'Test!!', lat: 35.8692386, lng: 128.5919156 }
 }
 
-const AdminMap = (props) => {
+const AdminAttraction = (props) => {
     let map, service, location, infowindow, geocoder, searchBox;
     // let markers = [];
     const classes = useStyles()
@@ -110,7 +112,6 @@ const AdminMap = (props) => {
     }
 
     const centerMarker = (name, lat, lng, setting = true) => {
-        console.log('in centerMarker')
         const svgMarker = {
             path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
             fillColor: "blue",
@@ -135,13 +136,6 @@ const AdminMap = (props) => {
     }
 
     const showCenterInfoWindow = (marker, name, lat, lng) => {
-        // let content = `<div>${place.name}</div>\
-        // <button onclick="setCenterPlace()">숙소로 등록하기!!</button>\
-        // `
-        // let content = `<div>${place.name}</div>\
-        // <button id="setCenterBtn">숙소로 등록하기!!</button>`
-
-
         let content = document.createElement('div');
         let nameEl = document.createElement('div');
         nameEl.innerText = name;
@@ -186,19 +180,20 @@ const AdminMap = (props) => {
 
         } else {
             console.log('center is null')
-            map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: defaultCenter.lat, lng: defaultCenter.lng },
-                zoom: 15,
-            })
+            history.push('/admin')
+            // map = new google.maps.Map(document.getElementById("map"), {
+            //     center: { lat: defaultCenter.lat, lng: defaultCenter.lng },
+            //     zoom: 15,
+            // })
 
-            location = new google.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
-            service = new google.maps.places.PlacesService(map);
-            infowindow = new google.maps.InfoWindow()
+            // location = new google.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
+            // service = new google.maps.places.PlacesService(map);
+            // infowindow = new google.maps.InfoWindow()
 
-            console.log('in initMap serive', service)
-            setServiceState(service)
+            // console.log('in initMap serive', service)
+            // setServiceState(service)
 
-            centerSearch();
+            // centerSearch();
         }
     }
 
@@ -275,10 +270,6 @@ const AdminMap = (props) => {
 
         service.nearbySearch(request, (results, status, pagetoken) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                // console.log('nearbySearch Result', results)
-                // console.log('pagetoken', pagetoken)
-
-                // await setSearch((prev) => prev.concat(results));
                 if (tmpResult === null) {
                     tmpResult = results;
                 } else {
@@ -293,24 +284,6 @@ const AdminMap = (props) => {
                     searchFiltering(tmpResult)
                 }
 
-                // if (next_page_token !== null) {
-                //     console.log('next!!', next_page_token.o)
-                //     restaurantSearch(service, next_page_token.o)
-                // } else {
-                //     console.log('end!!')
-                //     searchFiltering()
-                // }
-                // let tAllMarkers = [];
-                // for (let i = 0; i < results.length; i++) {
-                //     var marker = createMarker(results[i], i);
-                //     tAllMarkers.push(marker);
-                // }
-
-
-                // if (results[0].geometry != null && results[0].geometry.location != null) {
-                //     map.setCenter(results[0].geometry.location);
-                // }
-
             }
 
 
@@ -321,15 +294,12 @@ const AdminMap = (props) => {
         const searchInputEl = document.getElementById('input');
         const searchBox = new google.maps.places.SearchBox(searchInputEl);
 
-        // map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchInputEl);
-
         map.addListener("bounds_changed", () => {
             searchBox.setBounds(map.getBounds());
         })
 
         searchBox.addListener("places_changed", () => {
             const places = searchBox.getPlaces();
-            console.log('places : ', places)
 
             if (places.length === 0) {
                 return;
@@ -344,7 +314,6 @@ const AdminMap = (props) => {
             const bounds = new google.maps.LatLngBounds();
             places.forEach((place) => {
                 if (!place.geometry || !place.geometry.location) {
-                    console.log('Returned place contains no geometry')
                     return;
                 }
 
@@ -360,8 +329,6 @@ const AdminMap = (props) => {
     }
 
     const createMarker = (place, index) => {
-
-        console.log('in createMarker', place, index)
         const marker = new google.maps.Marker({
             map: map,
             position: place.geometry.location,
@@ -374,18 +341,12 @@ const AdminMap = (props) => {
         });
 
         marker.addListener('click', () => {
-            // clickHandler(index, place)
-            // setMapState((prev) => map)
             map.panTo({ lat: place.Latitude, lng: place.Longitude })
             setResults((prev) => prev !== null && prev.map((v, i) => ({
                 ...v, selected: (i === index ? true : false)
             })))
             setOpenDetail(true)
         })
-
-        // if (index == 0) {
-        //     google.maps.event.trigger(marker, 'click');
-        // }
 
         return marker;
     }
@@ -403,104 +364,30 @@ const AdminMap = (props) => {
 
     const searchFiltering = (tmpResult) => {
         console.log('in searchFiltering', tmpResult)
-        // db
-        // search.filter(~~~)
 
         LS2FindRestaurant().then(async (db_results) => {
-            console.log(db_results)
             const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => item.PlaceID) : []
             const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => item.PlaceID) : []
 
             return await recommend.concat(notRecommend);
         }).then((totalRestaurant) => {
-            console.log('totalRes', totalRestaurant)
-            console.log('tmpResult?', tmpResult)
-            // setSearch((prev) => tmpResult.filter(x => !totalRestaurant.includes(x.place_id)))
             return tmpResult.filter(x => !totalRestaurant.includes(x.place_id))
         })
             .then((updateRestaurant) => {
-                console.log('updateRestaurnt', updateRestaurant)
                 if (updateRestaurant.length !== 0) {
                     let tAllMarkers = [];
-                    console.log('after filter search', updateRestaurant)
                     for (let i = 0; i < updateRestaurant.length; i++) {
                         var marker = createMarker(updateRestaurant[i], i);
                         tAllMarkers.push(marker);
                     }
 
-                    console.log('in createMarker', tAllMarkers)
                     setMarkers(tAllMarkers);
-                    console.log('marker?', markers);
                     setSearch((prev) => updateRestaurant)
-
-                    // if (search[0].geometry != null && search[0].geometry.location != null) {
-                    //     map.setCenter(search[0].geometry.location);
-                    // }
                 }
             })
 
         setLoading(false);
     }
-
-    // const initAutoComplete  = () => {
-    //     const searchInputEl = document.getElementById('input');
-    //     const autoComplete = new google.maps.places.Autocomplete(searchInputEl, {
-    //         types: ['geocode'],
-    //         fields: ['place_id', 'formatted_address', 'geometry.location', 'name']
-    //     })
-
-    //     autoComplete.bindTo('bounds', map);
-    //     autoComplete.addListener('place_changed', () => {
-    //         const placeResult = autoComplete.getPlace();
-    //         console.log('in intiAC result : ',placeResult)
-    //         // setInput(placeResult.formatted_address)
-
-    //         console.log(placeResult.geometry.location.lat(), placeResult.geometry.location.lng())
-    //         console.log(map)
-
-    //         const marker = new google.maps.Marker({
-    //             map: map,
-    //             position: placeResult.geometry.location,
-    //         });
-
-    //         map.panTo(placeResult.geometry.location)
-    //     })
-    // }
-
-    // const initGeocode = () => {
-    //     geocoder = new google.maps.Geocoder();
-
-    //     const geocodeSearch = (query) => {
-    //         console.log('in geocode search!', query)
-    //         if (!query) {
-    //             return;
-    //         }
-
-    //         const handleResult = (geocodeResult) => {
-    //             return;
-    //         }
-
-    //         console.log(map)
-
-    //         // const request = {address: "Hell's Kitchen, 맨해튼 뉴욕 미국", bounds: map.getBounds()};
-    //         const request = {address: query, bounds: map.getBounds()};
-    //         geocoder.geocode(request, (results, status) => {
-    //             console.log(results, status)
-    //             if (status === 'OK') {
-    //                 if (results.length > 0) {
-    //                     const result = results[0]
-    //                     handleResult(result)
-    //                 }
-    //             }
-    //         })
-    //     }
-
-    //     const searchButtonEl = document.getElementById('searchBtn')
-    //         .addEventListener('click', () => {
-    //             console.log('search btn click!!')
-    //             geocodeSearch(input.trim())
-    //         })
-    // }
 
     useEffect(() => {
         initMap()
@@ -520,46 +407,7 @@ const AdminMap = (props) => {
 
     useEffect(() => {
         console.log('search changed', search, search.length)
-
-        // if (!loading) {
-        //     console.log('loading is false')
-
-        //     if (search.length > 0) {
-        //         console.log('markers length', markers, markers.length)
-        //         for (let i=0; i< markers.length; i++) {
-        //             markers[i].setMap(null);
-        //         }
-
-        //         // let tAllMarkers = [];
-        //         // for (let i = 0; i < search.length; i++) {
-        //         //     var marker = createMarker(search[i], i);
-        //         //     tAllMarkers.push(marker);
-        //         // }
-
-        //         // console.log('in createMarker', tAllMarkers)
-        //         // markers = tAllMarkers;
-        //     }
-        // }
-
-        // if (search.length > 0) {
-        //     let tAllMarkers = [];
-        //     for (let i = 0; i < search.length; i++) {
-        //         var marker = createMarker(search[i], i);
-        //         tAllMarkers.push(marker);
-        //     }
-
-        //     console.log('in createMarker', tAllMarkers)
-        //     // setMarkers((prev) => tAllMarkers);
-        // }
-
     }, [search])
-
-    // useEffect(() => {
-    //     console.log('marker changed', markers)
-    // }, [markers])
-    // useEffect(() => {
-    //     console.log('loading changed', loading)
-    // }, [loading])
 
 
 
@@ -571,8 +419,6 @@ const AdminMap = (props) => {
                         id='input'
                         className={classes.input}
                         placeholder="Search Google Maps"
-                    // value={input}
-                    // onChange={handleInputChange}
                     />
                     <IconButton onClick={handleClear} className={classes.iconButton}>
                         <ClearIcon />
@@ -582,11 +428,6 @@ const AdminMap = (props) => {
                         <SearchIcon />
                     </IconButton>
                 </Paper>
-
-                {/* <Button variant="contained" color="primary">
-                    {loading && <CircularProgress color="secondary" />}
-                    {loading ? 'Loading...' : `Update All!! (${search.length})`}
-                </Button> */}
 
                 <UpdateList
                     createMarker={createMarker}
@@ -657,8 +498,6 @@ const UpdateList = (props) => {
     }, [selectionModel])
 
     const handleUpdate = () => {
-        console.log('click update btn')
-        console.log('markers?', markers)
 
         if (selectionModel) {
 
@@ -676,11 +515,6 @@ const UpdateList = (props) => {
 
                     if (res !== undefined) {
                         putRestaurant(res).then((result) => {
-                            // console.log(result)
-                            // if (result.status === 'test_success') {
-                            //     indexList.push(lastIndex);
-                            // }
-                            // responseList.push(result);
                         })
                     }
                 })
@@ -689,58 +523,19 @@ const UpdateList = (props) => {
             updateCall(responseList, indexList);
             const tmp = search.slice();
             const tmpMarker = markers.slice();
-            console.log(tmp, search === tmp)
-
-            console.log('markers?1', markers)
-            // markers.forEach((marker) => {
-            //     marker.setMap(null);
-            // });
 
             let tAllMarkers = [];
             let i = 0;
             markers.map((marker, index) => {
                 if (selectionModel.includes(tmp[index].place_id)) {
-                    console.log('delete marker', index)
                     marker.setMap(null);
                 } else {
-                    console.log('insert marker', index)
                     tAllMarkers.push(tmpMarker[index])
                 }
             })
             setMarkers(tAllMarkers)
 
-            // tmp.filter(x => !selectionModel.includes(x.place_id))
-
-            // let tAllMarkers = [];
-            // for (let i = 0; i < tmp.length; i++) {
-            //     var marker = createMarker(tmp[i], i);
-            //     tAllMarkers.push(marker);
-            // }
-            // setMarkers(tAllMarkers)
-            console.log('markers?2', markers)
-            // markers = tmp.filter(x => !selectionModel.includes(x.place_id))
-
             setSearch((prev) => prev.filter(x => !selectionModel.includes(x.place_id)))
-
-
-
-
-            // console.log('responseList',responseList, responseList.length);
-            // console.log('indexList',indexList, indexList.length);
-
-            // setSearch((prev) => {
-            //     var tmp = prev.slice();
-            //     console.log('indexlist length', indexList.length, indexList)
-            //     console.log('init tmp', tmp)
-
-            //     for (let i=0; i< indexList.length; i++) {
-            //         tmp.splice(indexList[i],1)
-            //         console.log('middle tmp', tmp, i);
-            //     }
-
-            //     console.log('prev',tmp)
-            //     return tmp
-            // })
         }
     }
 
@@ -793,4 +588,4 @@ const UpdateListToolbar = (props) => {
     )
 }
 
-export default AdminMap;
+export default AdminAttraction;

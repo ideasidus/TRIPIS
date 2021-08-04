@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react'
 
 import './App.css';
 import Map from './component/map'
-import AdminMap from './component/adminMap'
+import AdminRestaurant from './component/admin/adminRestaurant'
 import Test from './component/test'
 import SideNav from './component/sideNav';
 
@@ -57,7 +57,12 @@ const App = () => {
           <Route path="/restaurant" component={() => <Map type='restaurant'></Map>} />
           <Route path="/attraction" component={() => <Map type='tourist_attraction'></Map>} />
           <Route path="/event" component={() => <Map type='lodging'></Map>} />
-          <Route path="/admin" component={() => <AdminMap />} />
+          
+
+          <Route path="/admin" component={() => <AdminRestaurant />} />
+          <Route path="/admin/restaurant" component={() => <AdminRestaurant />} />
+          <Route path="/admin/attraction" component={() => <AdminRestaurant />} />
+          <Route path="/admin/event" component={() => <AdminRestaurant />} />
           <Route path="/test" component={() => <Test />} />
         </Switch>
       </Router>

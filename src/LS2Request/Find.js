@@ -1,5 +1,24 @@
 import LS2Request from "@enact/webos/LS2Request";
 
+export const findCenter = () => {
+    return new Promise((resolve, reject) => {
+        new LS2Request().send({
+            service: 'com.webos.service.db',
+            method: 'find',
+            parameters: {
+                "query":{
+                    "from":"com.trip.info:6"
+                        }
+            },
+            onSuccess: (res) => {
+                resolve({ status: 'success', data: res.results })
+            },
+            onFailure: (res) => {
+                resolve({ status: 'fail', data: [] })
+            }
+        })
+    })
+}
 
 export const findRestaurant = () => {
     // find restaurant recommended by host
@@ -21,7 +40,15 @@ export const findRestaurant = () => {
                 resolve({ status: 'success', data: res.results })
             },
             onFailure: (res) => {
-                resolve({ status: 'fail', data: [] })
+                resolve({status: 'success', data: {
+                    PlaceID: 'test',
+                    Name:'Test Center',
+                    Latitude: 35.8692386,
+                    Longitude: 128.5919156,
+                    PhoneNumber: 'Not Yet',
+
+                }})
+                // resolve({ status: 'fail', data: [] })
             }
         })
     })
@@ -45,11 +72,9 @@ export const findRestaurant = () => {
                 },
             },
             onSuccess: (res) => {
-                // console.log('notRecommend', res.results);
                 resolve({ status: 'success', data: res.results })
             },
             onFailure: (res) => {
-                // console.log('notRecommend fail', res);
                 resolve({ status: 'fail', data: [] })
             }
         })
@@ -61,19 +86,21 @@ export const findRestaurant = () => {
     return Promise.all([recommend, notRecommend]).then((results) => {
 
         // for test
-        // return [{status: 'success', data: [{
-        //     Address: 'Test Address', AveragePrice: 100, Distance: 1000, 
-        //     DistanceRate:2, HostRecommendation: true, Latitude: 35.8709543,
-        //     Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
-        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
-        //     TasterRate:3.5, TotalRate:4
-        // }, {
-        //     Address: 'Test Address2', AveragePrice: 100, Distance: 1500, 
-        //     DistanceRate:2, HostRecommendation: true, Latitude: 35.8674918,
-        //     Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
-        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
-        //     TasterRate:3.5, TotalRate:3.2
-        // }]}, []]
+        // return [{
+        //     status: 'success', data: [{
+        //         Address: 'Test Address', AveragePrice: 100, Distance: 1000,
+        //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.8709543,
+        //         Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
+        //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
+        //         TasterRate: 3.5, TotalRate: 4
+        //     }, {
+        //         Address: 'Test Address2', AveragePrice: 100, Distance: 1500,
+        //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.8674918,
+        //         Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
+        //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
+        //         TasterRate: 3.5, TotalRate: 3.2
+        //     }]
+        // }, []]
 
         return results
     })
@@ -81,6 +108,73 @@ export const findRestaurant = () => {
 }
 
 export const findAttraction = () => {
+    let recommend = new Promise((resolve, reject) => {
+        new LS2Request().send({
+            service: 'com.webos.service.db',
+            method: 'find',
+            parameters: {
+                "query": {
+                    "from": "com.trip.info:2",
+                    "where": [{
+                        "prop": "HostRecommendation",
+                        "op": "=",
+                        "val": true
+                    }]
+                }
+            },
+            onSuccess: (res) => {
+                resolve({ status: 'success', data: res.results })
+            },
+            onFailure: (res) => {
+                resolve({ status: 'fail', data: [] })
+            }
+        })
+    })
+
+    let notRecommend = new Promise((resolve, reject) => {
+        new LS2Request().send({
+            service: 'com.webos.service.db',
+            method: 'find',
+            parameters: {
+                "query": {
+                    "from": "com.trip.info:2",
+                    "where": [{
+                        "prop": "HostRecommendation",
+                        "op": "!=",
+                        "val": true
+                    }]
+                }
+            },
+            onSuccess: (res) => {
+                resolve({ status: 'success', data: res.results })
+            },
+            onFailure: (res) => {
+                resolve({ status: 'fail', data: [] })
+            }
+        })
+    })
+
+    return Promise.all([recommend, notRecommend]).then((results) => {
+        // for test
+        // return [{
+        //     status: 'success', data: [{
+        //         Address: 'Test Address', AveragePrice: 100, Distance: 1000,
+        //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.8709543,
+        //         Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
+        //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
+        //         TasterRate: 3.5, TotalRate: 4
+        //     }, {
+        //         Address: 'Test Address2', AveragePrice: 100, Distance: 1500,
+        //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.8674918,
+        //         Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
+        //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
+        //         TasterRate: 3.5, TotalRate: 3.2
+        //     }]
+        // }, []]
+
+        return results;
+    })
+
 }
 
 export const findEvent = () => {

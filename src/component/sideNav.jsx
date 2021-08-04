@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
         //     padding: "8px 35px 8px 10px"
         // }
 
-        "& nav ul li .pro-inner-item" : {
+        "& nav ul li .pro-inner-item": {
             // fontSize: "14px",
             padding: "8px 35px 8px 10px!important",
         }
@@ -39,15 +39,30 @@ const SideNav = (props) => {
 
 
     const clickHandler = (key) => {
-        if (key === 'restaurant') {
-            history.push('/restaurant');
-        } else if (key === 'attracttion'){
-            history.push('/attraction')
-        } else if (key === 'event') {
-            history.push('/event')
-        } else if (key === 'admin') {
-            history.push('/admin')
+
+        console.log('now url', history.location.pathname);
+
+        if (history.location.pathname.indexOf('admin') != -1) {
+            if (key === 'restaurant') {
+                history.push('/admin/restaurant');
+            } else if (key === 'attracttion') {
+                history.push('/admin/attraction')
+            } else if (key === 'event') {
+                history.push('/admin/event')
+            }
+        } else {
+            if (key === 'restaurant') {
+                history.push('/restaurant');
+            } else if (key === 'attracttion') {
+                history.push('/attraction')
+            } else if (key === 'event') {
+                history.push('/event')
+            } else if (key === 'admin') {
+                history.push('/admin')
+            }
         }
+
+
     }
 
     return (
@@ -79,18 +94,18 @@ const SideNav = (props) => {
             </SidebarHeader>
             <SidebarContent className={classes.content}>
                 <Menu iconShape="square" >
-                    <SubMenu title="Restaurant" icon={<img src="restaurant.png" width='35'/>} onClick={(e) => clickHandler('restaurant')}>
+                    <SubMenu title="Restaurant" icon={<img src="restaurant.png" width='35' />} onClick={(e) => clickHandler('restaurant')}>
                         <MenuItem>Restaurant</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Attraction" icon={<img src="attraction.png" width='35'/>} onClick={(e) => clickHandler('attracttion')}>
+                    <SubMenu title="Attraction" icon={<img src="attraction.png" width='35' />} onClick={(e) => clickHandler('attracttion')}>
                         <MenuItem>Attraction</MenuItem>
                     </SubMenu>
-                    <SubMenu title="Event" icon={<img src="event.png" width='35'/>} onClick={(e) => clickHandler('event')}>
+                    <SubMenu title="Event" icon={<img src="event.png" width='35' />} onClick={(e) => clickHandler('event')}>
                         <MenuItem>Event</MenuItem>
                     </SubMenu>
-                </Menu>    
+                </Menu>
                 <Menu >
-                    <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img"/>}>
+                    <SubMenu title="Weather" icon={<img src={`http://openweathermap.org/img/w/${props.weatherIcon}.png`} alt="img" />}>
                         <MenuItem>{props.weatherTemp}℃</MenuItem>
                         <MenuItem>{props.weatherDesc}</MenuItem>
                     </SubMenu>
@@ -109,7 +124,7 @@ const SideNav = (props) => {
                         className="sidebar-btn"
                         rel="noopener noreferrer"
                     >
-                        <img src="admin.png" width='35'/>
+                        <img src="admin.png" width='35' />
                         {/* <span> {intl.formatMessage({ id: 'viewSource' })}</span> */}
                     </a>
                 </div>
