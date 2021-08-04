@@ -86,7 +86,6 @@ export const findRestaurant = () => {
     return Promise.all([recommend, notRecommend]).then((results) => {
 
         // for test
-<<<<<<< HEAD
         // return [{
         //     status: 'success', data: [{
         //         Address: 'Test Address', AveragePrice: 100, Distance: 1000,
@@ -102,21 +101,6 @@ export const findRestaurant = () => {
         //         TasterRate: 3.5, TotalRate: 3.2
         //     }]
         // }, []]
-=======
-        return [{status: 'success', data: [{
-            Address: 'Test Address', AveragePrice: 100, Distance: 1000, 
-            DistanceRate:2, HostRecommendation: true, Latitude: 35.8709543,
-            Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
-            NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
-            TasterRate:3.5, TotalRate:4
-        }, {
-            Address: 'Test Address2', AveragePrice: 100, Distance: 1500, 
-            DistanceRate:2, HostRecommendation: true, Latitude: 35.8674918,
-            Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
-            NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
-            TasterRate:3.5, TotalRate:3.2
-        }]}, []]
->>>>>>> aa66f02b6599b7b682b6cbb2ef16113289257a6e
 
         return results
     })
@@ -218,19 +202,19 @@ export const findRestaurantReview = () => {
 
     return Promise.all([reviewData]).then((results) => {
         // return [{status: 'success', data: [{
-        //     "PlaceID": "0",
+        //     "PlaceID": "ChIJyychK8XjZTURs6UKGVhF1-s",
         //     "UserName": "asdf",
         //     "TasteRate": "5",
         //     "DistanceRate": "4",
         //     "TotalRate": "3"
         // },{
-        //     "PlaceID": "0",
+        //     "PlaceID": "ChIJyychK8XjZTURs6UKGVhF1-s",
         //     "UserName": "zxcv",
         //     "TasteRate": "3",
         //     "DistanceRate": "4",
         //     "TotalRate": "5"
         // },{
-        //     "PlaceID": "1",
+        //     "PlaceID": "ChIJgd5ZPcTjZTURhIDk2qKpq5A",
         //     "UserName": "qwerty",
         //     "TasteRate": "1",
         //     "DistanceRate": "1",
