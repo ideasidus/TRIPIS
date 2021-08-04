@@ -18,6 +18,11 @@ import { findRestaurant as LS2FindRestaurant } from '../../LS2Request/Find';
 import { putRestaurant } from '../../LS2Request/Put';
 
 const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'flex',
+        background: 'white',
+    },
+
     listSection: {
         width: '20vw', minWidth: 400, height: '100vh', overflowY: 'auto',
     },
@@ -667,7 +672,7 @@ const AdminMap = (props) => {
 
 
     return (
-        <div style={{ display: 'flex' }}>
+        <div className={classes.root}>
             <div className={classes.listSection}>
                 <Paper className={classes.inputPaper}>
                     <InputBase
