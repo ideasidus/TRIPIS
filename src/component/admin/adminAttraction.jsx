@@ -438,7 +438,7 @@ const AdminAttraction = (props) => {
                                             Object.assign(res, {
                                                 address: place.formatted_address,
                                                 phone: place.formatted_phone_number,
-                                                distance: Math.round(haversine([res.geometry.location.lng(), res.geometry.location.lat()], [center.lng, center.lat]))
+                                                distance: Math.round(haversine([res.geometry.location.lng(), res.geometry.location.lat()], [center.Longitude, center.Latitude]))
                                             }))
                                     }
                                 })
