@@ -589,6 +589,7 @@ const AdminMap = (props) => {
                 </Button> */}
 
                 <UpdateList
+                    createMarker={createMarker}
                     setMarkers={setMarkers}
                     markers={markers}
                     search={search}
@@ -626,7 +627,7 @@ const AdminMap = (props) => {
 
 const UpdateList = (props) => {
 
-    const { loading, rows, setSearch, search, markers, setMarkers } = props;
+    const { loading, rows, setSearch, search, markers, setMarkers, createMarker } = props;
     const [selectionModel, setSelectionModel] = useState([]);
 
     const columns = [
@@ -687,6 +688,7 @@ const UpdateList = (props) => {
 
             updateCall(responseList, indexList);
             const tmp = search.slice();
+            const tmpMarker = markers.slice();
             console.log(tmp, search === tmp)
 
             console.log('markers?1', markers)
@@ -694,14 +696,20 @@ const UpdateList = (props) => {
             //     marker.setMap(null);
             // });
 
+            let tAllMarkers = [];
+            let i = 0;
             markers.map((marker, index) => {
                 if (selectionModel.includes(tmp[index].place_id)) {
+                    console.log('delete marker', index)
                     marker.setMap(null);
+                } else {
+                    console.log('insert marker', index)
+                    tAllMarkers.push(tmpMarker[index])
                 }
             })
-            setMarkers(tmp.filter(x => !selectionModel.includes(x.place_id)))
+            setMarkers(tAllMarkers)
 
-            tmp.filter(x => !selectionModel.includes(x.place_id))
+            // tmp.filter(x => !selectionModel.includes(x.place_id))
 
             // let tAllMarkers = [];
             // for (let i = 0; i < tmp.length; i++) {
