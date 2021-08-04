@@ -12,7 +12,8 @@ import { useEffect } from 'react';
 
 import { DetailItem } from './map';
 
-import { getRestaurant as LS2getRestaurant, putRestaurant } from "./LS2Request";
+import { findRestaurant as LS2FindRestaurant } from '../LS2Request/Find';
+import { putRestaurant } from '../LS2Request/Put';
 
 const useStyles = makeStyles((theme) => ({
     listSection: {
@@ -76,6 +77,7 @@ const getCenter = () => {
 
 const AdminMap = (props) => {
     let map, service, location, infowindow, geocoder, searchBox;
+    // let markers = [];
     const classes = useStyles()
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -220,7 +222,6 @@ const AdminMap = (props) => {
             markers.forEach((marker) => {
                 marker.setMap(null);
             });
-
             setMarkers([]);
 
             const bounds = new google.maps.LatLngBounds();
@@ -252,6 +253,8 @@ const AdminMap = (props) => {
         }
 
         let request;
+        let tmpResult = null;
+
         if (pageToken) {
             request = {
                 location: center,
@@ -275,14 +278,19 @@ const AdminMap = (props) => {
                 // console.log('nearbySearch Result', results)
                 // console.log('pagetoken', pagetoken)
 
-                setSearch((prev) => prev.concat(results));
+                // await setSearch((prev) => prev.concat(results));
+                if (tmpResult === null) {
+                    tmpResult = results;
+                } else {
+                    tmpResult = tmpResult.concat(results);
+                }
 
                 if (pagetoken.hasNextPage) {
                     console.log('next!!')
                     pagetoken.nextPage();
                 } else {
                     console.log('end!!')
-                    searchFiltering()
+                    searchFiltering(tmpResult)
                 }
 
                 // if (next_page_token !== null) {
@@ -331,7 +339,6 @@ const AdminMap = (props) => {
             markers.forEach((marker) => {
                 marker.setMap(null);
             });
-
             setMarkers([]);
 
             const bounds = new google.maps.LatLngBounds();
@@ -352,16 +359,85 @@ const AdminMap = (props) => {
         })
     }
 
-    const searchFiltering = () => {
+    const createMarker = (place, index) => {
+
+        console.log('in createMarker', place, index)
+        const marker = new google.maps.Marker({
+            map: map,
+            position: place.geometry.location,
+            label: numToSSColumn(index + 1),
+        });
+
+        google.maps.event.addListener(marker, "click", () => {
+            infowindow.setContent(place.name || "");
+            infowindow.open(map);
+        });
+
+        marker.addListener('click', () => {
+            // clickHandler(index, place)
+            // setMapState((prev) => map)
+            map.panTo({ lat: place.Latitude, lng: place.Longitude })
+            setResults((prev) => prev !== null && prev.map((v, i) => ({
+                ...v, selected: (i === index ? true : false)
+            })))
+            setOpenDetail(true)
+        })
+
+        // if (index == 0) {
+        //     google.maps.event.trigger(marker, 'click');
+        // }
+
+        return marker;
+    }
+
+    function numToSSColumn(num) {
+        let s = '', t;
+
+        while (num > 0) {
+            t = (num - 1) % 26;
+            s = String.fromCharCode(65 + t) + s;
+            num = (num - t) / 26 | 0;
+        }
+        return s || undefined;
+    }
+
+    const searchFiltering = (tmpResult) => {
+        console.log('in searchFiltering', tmpResult)
         // db
         // search.filter(~~~)
 
-        LS2getRestaurant().then((results) => {
-            const [recommend, notRecommend] = results;
-            const sumList = recommend.data.concat(notRecommend.data)
+        LS2FindRestaurant().then(async (db_results) => {
+            console.log(db_results)
+            const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => item.PlaceID) : []
+            const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => item.PlaceID) : []
 
-            setSearch((prev) => prev.filter(x => !sumList.includes(x)))
+            return await recommend.concat(notRecommend);
+        }).then((totalRestaurant) => {
+            console.log('totalRes', totalRestaurant)
+            console.log('tmpResult?', tmpResult)
+            // setSearch((prev) => tmpResult.filter(x => !totalRestaurant.includes(x.place_id)))
+            return tmpResult.filter(x => !totalRestaurant.includes(x.place_id))
         })
+            .then((updateRestaurant) => {
+                console.log('updateRestaurnt', updateRestaurant)
+                if (updateRestaurant.length !== 0) {
+                    let tAllMarkers = [];
+                    console.log('after filter search', updateRestaurant)
+                    for (let i = 0; i < updateRestaurant.length; i++) {
+                        var marker = createMarker(updateRestaurant[i], i);
+                        tAllMarkers.push(marker);
+                    }
+
+                    console.log('in createMarker', tAllMarkers)
+                    setMarkers(tAllMarkers);
+                    console.log('marker?', markers);
+                    setSearch((prev) => updateRestaurant)
+
+                    // if (search[0].geometry != null && search[0].geometry.location != null) {
+                    //     map.setCenter(search[0].geometry.location);
+                    // }
+                }
+            })
 
         setLoading(false);
     }
@@ -443,8 +519,44 @@ const AdminMap = (props) => {
     }, [center])
 
     useEffect(() => {
-        console.log('search changed', search)
+        console.log('search changed', search, search.length)
+
+        // if (!loading) {
+        //     console.log('loading is false')
+
+        //     if (search.length > 0) {
+        //         console.log('markers length', markers, markers.length)
+        //         for (let i=0; i< markers.length; i++) {
+        //             markers[i].setMap(null);
+        //         }
+
+        //         // let tAllMarkers = [];
+        //         // for (let i = 0; i < search.length; i++) {
+        //         //     var marker = createMarker(search[i], i);
+        //         //     tAllMarkers.push(marker);
+        //         // }
+
+        //         // console.log('in createMarker', tAllMarkers)
+        //         // markers = tAllMarkers;
+        //     }
+        // }
+
+        // if (search.length > 0) {
+        //     let tAllMarkers = [];
+        //     for (let i = 0; i < search.length; i++) {
+        //         var marker = createMarker(search[i], i);
+        //         tAllMarkers.push(marker);
+        //     }
+
+        //     console.log('in createMarker', tAllMarkers)
+        //     // setMarkers((prev) => tAllMarkers);
+        // }
+
     }, [search])
+
+    // useEffect(() => {
+    //     console.log('marker changed', markers)
+    // }, [markers])
     // useEffect(() => {
     //     console.log('loading changed', loading)
     // }, [loading])
@@ -477,6 +589,10 @@ const AdminMap = (props) => {
                 </Button> */}
 
                 <UpdateList
+                    setMarkers={setMarkers}
+                    markers={markers}
+                    search={search}
+                    setSearch={setSearch}
                     setSelection={() => setSelection()}
                     loading={loading}
                     rows={loading ? []
@@ -510,7 +626,7 @@ const AdminMap = (props) => {
 
 const UpdateList = (props) => {
 
-    const { loading, rows } = props;
+    const { loading, rows, setSearch, search, markers, setMarkers } = props;
     const [selectionModel, setSelectionModel] = useState([]);
 
     const columns = [
@@ -519,7 +635,9 @@ const UpdateList = (props) => {
         { field: 'vicinity', headerName: 'Vicinity', width: '125' }
     ]
 
-    console.log('rows',rows)
+    console.log('rows', rows)
+    console.log('props markers?', markers)
+
 
     // const dumiRows = [
     //     { id: 1, name: 'Snow', rating: 'Jon', vicinity: 35, test: 't' },
@@ -538,15 +656,83 @@ const UpdateList = (props) => {
     }, [selectionModel])
 
     const handleUpdate = () => {
+        console.log('click update btn')
+        console.log('markers?', markers)
+
         if (selectionModel) {
-            selectionModel.map((item) => {
-                const res = rows.find((element, index, array) => {
-                    return item === rows.id;
+
+            let responseList = [];
+            let indexList = [];
+
+            async function updateCall(responseList, indexList) {
+                await selectionModel.map((item) => {
+                    let lastIndex = -1;
+
+                    const res = rows.find((element, index, array) => {
+                        lastIndex = index;
+                        return item === element.id;
+                    })
+
+                    if (res !== undefined) {
+                        putRestaurant(res).then((result) => {
+                            // console.log(result)
+                            // if (result.status === 'test_success') {
+                            //     indexList.push(lastIndex);
+                            // }
+                            // responseList.push(result);
+                        })
+                    }
                 })
-                if (res !== undefined) {
-                    putRestaurant(res);
+            }
+
+            updateCall(responseList, indexList);
+            const tmp = search.slice();
+            console.log(tmp, search === tmp)
+
+            console.log('markers?1', markers)
+            // markers.forEach((marker) => {
+            //     marker.setMap(null);
+            // });
+
+            markers.map((marker, index) => {
+                if (selectionModel.includes(tmp[index].place_id)) {
+                    marker.setMap(null);
                 }
             })
+            setMarkers(tmp.filter(x => !selectionModel.includes(x.place_id)))
+
+            tmp.filter(x => !selectionModel.includes(x.place_id))
+
+            // let tAllMarkers = [];
+            // for (let i = 0; i < tmp.length; i++) {
+            //     var marker = createMarker(tmp[i], i);
+            //     tAllMarkers.push(marker);
+            // }
+            // setMarkers(tAllMarkers)
+            console.log('markers?2', markers)
+            // markers = tmp.filter(x => !selectionModel.includes(x.place_id))
+
+            setSearch((prev) => prev.filter(x => !selectionModel.includes(x.place_id)))
+
+
+
+
+            // console.log('responseList',responseList, responseList.length);
+            // console.log('indexList',indexList, indexList.length);
+
+            // setSearch((prev) => {
+            //     var tmp = prev.slice();
+            //     console.log('indexlist length', indexList.length, indexList)
+            //     console.log('init tmp', tmp)
+
+            //     for (let i=0; i< indexList.length; i++) {
+            //         tmp.splice(indexList[i],1)
+            //         console.log('middle tmp', tmp, i);
+            //     }
+
+            //     console.log('prev',tmp)
+            //     return tmp
+            // })
         }
     }
 
@@ -564,7 +750,7 @@ const UpdateList = (props) => {
             selectionModel={selectionModel}
 
             components={{ Toolbar: UpdateListToolbar }}
-            componentsProps={{ toolbar: { selectionModel:selectionModel, handleUpdate: handleUpdate  } }}
+            componentsProps={{ toolbar: { selectionModel: selectionModel, handleUpdate: handleUpdate } }}
         // disableSelectionOnClick
         >
 

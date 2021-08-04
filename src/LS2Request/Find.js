@@ -61,19 +61,19 @@ export const findRestaurant = () => {
     return Promise.all([recommend, notRecommend]).then((results) => {
 
         // for test
-        return [{status: 'success', data: [{
-            Address: 'Test Address', AveragePrice: 100, Distance: 1000, 
-            DistanceRate:2, HostRecommendation: true, Latitude: 40.759,
-            Longitude: -73.996, Name: 'Test Name', NumberOFCustomer: 8,
-            NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJc87lok1YwokRJzddYNyu9Ys',
-            TasterRate:3.5, TotalRate:4
-        }, {
-            Address: 'Test Address2', AveragePrice: 100, Distance: 1500, 
-            DistanceRate:2, HostRecommendation: true, Latitude: 40.762,
-            Longitude: -73.99658, Name: 'Test Name2', NumberOFCustomer: 8,
-            NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJc87lok1YwokRJzddYNyu9Ys2',
-            TasterRate:3.5, TotalRate:3.2
-        }]}, []]
+        // return [{status: 'success', data: [{
+        //     Address: 'Test Address', AveragePrice: 100, Distance: 1000, 
+        //     DistanceRate:2, HostRecommendation: true, Latitude: 35.8709543,
+        //     Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
+        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
+        //     TasterRate:3.5, TotalRate:4
+        // }, {
+        //     Address: 'Test Address2', AveragePrice: 100, Distance: 1500, 
+        //     DistanceRate:2, HostRecommendation: true, Latitude: 35.8674918,
+        //     Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
+        //     NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
+        //     TasterRate:3.5, TotalRate:3.2
+        // }]}, []]
 
         return results
     })
