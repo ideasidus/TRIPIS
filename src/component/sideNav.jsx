@@ -43,6 +43,8 @@ const SideNav = (props) => {
         console.log('now url', history.location.pathname);
 
         if (history.location.pathname.indexOf('admin') != -1) {
+            if (props.center == null) return;
+
             if (key === 'restaurant') {
                 history.push('/admin/restaurant');
             } else if (key === 'attracttion') {

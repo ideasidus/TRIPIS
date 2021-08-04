@@ -292,11 +292,21 @@ const Map = (props) => {
     }
 
     const descendingComparator = (a, b, orderBy) => {
-        if (b[orderBy] < a[orderBy]) {
-            return -1;
+        if(orderBy == 'index'){
+            if (b['HostRecommendation'] < a['HostRecommendation']) {
+                return 1;
+            }
+            if (b['HostRecommendation'] > a['HostRecommendation']) {
+                return -1;
+            }
         }
-        if (b[orderBy] > a[orderBy]) {
-            return 1;
+        else {
+            if (b[orderBy] < a[orderBy]) {
+                return -1;
+            }
+            if (b[orderBy] > a[orderBy]) {
+                return 1;
+            }
         }
         return 0;
     }
