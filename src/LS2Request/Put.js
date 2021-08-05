@@ -123,15 +123,13 @@ export const putAttractionReview = (obj) => {
             parameters: {
                 "objects":[
                     {
-                        "PlaceID":obj.PlaceID,
-                        "DistanceRate":obj.DistanceRate,
-                        "UserName":obj.UserName,
-                        "Password":obj.Password,
-                        "TasteRate":obj.TasteRate,
-                        "TotalRate":obj.TotalRate,
-                        "TotalPrice":obj.TotalPrice,
-                        "NumberOfCustomer":obj.NumberOfCustomer,
-                        "_kind":"com.trip.info:5"
+                        "PlaceID": obj.PlaceID,
+                        "UserName": obj.UserName,
+                        "Password": obj.Password,
+                        "SatisfactionRate": obj.SatisfactionRate,
+                        "DistanceRate": obj.DistanceRate,
+                        "TotalRate": obj.TotalRate,
+                        "_kind": "com.trip.info:5"
                     }
                 ]
             },

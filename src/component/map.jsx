@@ -10,7 +10,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 import { findRestaurant as LS2getRestaurant, findAttraction as LS2getAttraction, findRestaurantReview, findAttractionReview} from "../LS2Request/Find";
 import { putRestaurantReview, putAttractionReview } from "../LS2Request/Put";
-import { mergeRestaurant } from "../LS2Request/Merge";
+import { mergeRestaurant, mergeAttraction } from "../LS2Request/Merge";
 
 // import GoogleMapReact from "google-map-react";
 // import axios from "axios";
@@ -121,6 +121,7 @@ const Map = (props) => {
     const [tasteRating, setTasteRating] = useState(5);
     const [distanceRating, setDistanceRating] = useState(5);
     const [overallRating, setOverallRating] = useState(5);
+    const [satisfactionRate, setSatisfactionRate] = useState(5);
     const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
     const [totalPrice, setTotalPrice] = useState(0);
@@ -500,17 +501,17 @@ const Map = (props) => {
     }, [results])
 
     const addReviews = () => {
-        const reviewData = {
-            "PlaceID": results[selectedIndex].PlaceID,
-            "UserName": userName,
-            "Password": password,
-            "TasteRate": tasteRating,
-            "DistanceRate": distanceRating,
-            "TotalRate": overallRating,
-            "TotalPrice": parseInt(totalPrice),  // DummyData
-            "NumberOfCustomer": parseInt(numberOfCustomer)  // DummyData
-        }
         if (request_type == 'restaurant') {
+            const reviewData = {
+                "PlaceID": results[selectedIndex].PlaceID,
+                "UserName": userName,
+                "Password": password,
+                "TasteRate": tasteRating,
+                "DistanceRate": distanceRating,
+                "TotalRate": overallRating,
+                "TotalPrice": parseInt(totalPrice),  // DummyData
+                "NumberOfCustomer": parseInt(numberOfCustomer)  // DummyData
+            }
             putRestaurantReview(reviewData)  // add to Database
             setResults((prev) => prev.map((v, i) => {
                 if (v.PlaceID === results[selectedIndex].PlaceID) {
@@ -544,176 +545,366 @@ const Map = (props) => {
                     }
                 }
             }))
+            setReviews(reviews.concat([{
+                index: results[selectedIndex].PlaceID,
+                username: userName,
+                password: password,
+                tasteRating: tasteRating,
+                distanceRating: distanceRating,
+                overallRating: overallRating,
+                totalPrice: totalPrice,
+                numberOfCustomer: numberOfCustomer
+            }]));
         }
         else if (request_type == 'tourist_attraction') {
+            const reviewData = {
+                "PlaceID": results[selectedIndex].PlaceID,
+                "UserName": userName,
+                "Password": password,
+                "SatisfactionRate": satisfactionRate,
+                "DistanceRate": distanceRating,
+                "TotalRate": overallRating
+            }
             putAttractionReview(reviewData)
+            setResults((prev) => prev.map((v, i) => {
+                if (v.PlaceID === results[selectedIndex].PlaceID) {
+                    const prevNOR = v.NumberOfRate
+                    const newNOR = v.NumberOfRate + 1
+                    const newData = {
+                        PlaceID: v.PlaceID,
+                        newNOR: newNOR,
+                        newSatis: parseFloat(((v.SatisfactionRate * prevNOR + satisfactionRate) / newNOR).toFixed(1)),
+                        newDist: parseFloat(((v.DistanceRate * prevNOR + distanceRating) / newNOR).toFixed(1)),
+                        newTotal: parseFloat(((v.TotalRate * prevNOR + overallRating) / newNOR).toFixed(1))
+                    }
+                    console.log("newData : ", newData)
+                    mergeAttraction(newData)  // merge DB2
+                    return {
+                        ...v,
+                        NumberOfRate: newData.newNOR,
+                        SatisfactionRate: newData.newSatis,
+                        DistanceRate: newData.newDist,
+                        TotalRate: newData.newTotal
+                    }
+                } else {
+                    return {
+                        ...v
+                    }
+                }
+            }))
+            setReviews(reviews.concat([{
+                index: results[selectedIndex].PlaceID,
+                username: userName,
+                password: password,
+                satisfactionRate: satisfactionRate,
+                distanceRating: distanceRating,
+                overallRating: overallRating
+            }]));
         }
-        setReviews(reviews.concat([{
-            index: results[selectedIndex].PlaceID,
-            username: userName,
-            password: password,
-            tasteRating: tasteRating,
-            distanceRating: distanceRating,
-            overallRating: overallRating,
-            totalPrice: totalPrice,
-            numberOfCustomer: numberOfCustomer
-        }]));
+        
         setUserName('')
         setPassword('')
+        console.log(reviews)
     }
 
-    return (
-        // <div style={{ display: 'flex' }}>
-        <div className={classes.root}>
-
-            <div className={classes.leftMenu}>
-                {/* <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
-                    <Button color="inherit" onClick={getRestaurant}>Restaurant</Button>
-                    <Button color="inherit">Attraction</Button>
-                    <Button color="inherit">Event</Button>
-                </ButtonGroup> */}
-                <Divider />
-                {/* <List>
-                    {results !== null && results.map((item, index) => {
-                        return <><LocationItem
-                            key={index}
-                            click={(e) => clickHandler(index, item)}
-                            {...item}
-                            index={numToSSColumn(index + 1)}
-                        // name={item.name}
-                        // vicinity={item.vicinity}
-                        // rating={item.rating}
-                        // selected={item.selected}
-                        /><Divider /></>
-                    })}
-                </List> */}
-                <TableContainer>
-                    <Table>
-                        <SortTableHead
-                            order={order}
-                            orderBy={orderBy}
-                            onRequestSort={handleRequestSort}
-                        />
-                        <TableBody>
-                            {results !== null && stableSort(results, getComparator(order, orderBy)).map((item, index) => {
-                                return <LocationItem
-                                    key={index}
-                                    click={(e) => clickHandler(index, item)}
-                                    {...item}
-                                    index={numToSSColumn(index + 1)}
-                                    name={item.Name}
-                                    vicinity={item.Address}
-                                    rating={item.TotalRate ? item.TotalRate : 0}
-                                    distance={item.Distance}
-                                    recommend={item.HostRecommendation}
-                                    selected={item.selected}
-                                />
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-
-                <div class="results">
-                </div>
-            </div>
-            <div id="map" className={openDetail ? classes.mapOpened : classes.mapNotOpened}>
-                test
-            </div>
-
-            <div className={openDetail ? classes.detailItemOpened : classes.detailItemNotOpened}>
-                {/* <DetailItem
-                    name="피자에땅 경대점"
-                    address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
-                    phone_number="053-939-2277"
-                    distance="598m"
-                    total_rate={4.2}
-                    distance_rate={5}
-                    taste_rate={3.4}
-                    clickRate={() => dialogOpen()}
-                /> */}
-                {(results !== null && <DetailItem
-                    // name={results[selectedIndex].name}
-                    // address={results[selectedIndex].vicinity}
-                    // phone_number={results[selectedIndex].PhoneNumber} _NEW
-                    // distance={results[selectedIndex].distance}
-                    // total_rate={results[selectedIndex].rating ? results[selectedIndex].rating : 0}
-                    // distance_rate={results[selectedIndex].DistanceRate} _NEW
-                    // taste_rate={results[selectedIndex].TasteRate} _NEW
-                    {...results[selectedIndex]}
-                    clickBtn={() => dialogOpen()}
-                    reviews = {reviews}
-                    selectedIndex = {selectedIndex}
-                    selectedID = {selectedIndex}
-                    btnName="Rate!"
-                />)}
-            </div>
-
-            <Dialog
-                open={dialog}
-                onClose={dialogClose}
-            >
-                <DialogTitle>
-                    Rate
-                </DialogTitle>
-
-                <DialogContent>
+    if (request_type == 'restaurant'){
+        return (
+            // <div style={{ display: 'flex' }}>
+            <div className={classes.root}>
+    
+                <div className={classes.leftMenu}>
+                    {/* <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
+                        <Button color="inherit" onClick={getRestaurant}>Restaurant</Button>
+                        <Button color="inherit">Attraction</Button>
+                        <Button color="inherit">Event</Button>
+                    </ButtonGroup> */}
+                    <Divider />
+                    {/* <List>
+                        {results !== null && results.map((item, index) => {
+                            return <><LocationItem
+                                key={index}
+                                click={(e) => clickHandler(index, item)}
+                                {...item}
+                                index={numToSSColumn(index + 1)}
+                            // name={item.name}
+                            // vicinity={item.vicinity}
+                            // rating={item.rating}
+                            // selected={item.selected}
+                            /><Divider /></>
+                        })}
+                    </List> */}
                     <TableContainer>
                         <Table>
-                            <TableRow>
-                                <TableCell>Name : </TableCell>
-                                <TableCell>
-                                    <input type="text" value={userName} onChange={(e) => { setUserName(e.target.value) }}/>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>password : </TableCell>
-                                <TableCell>
-                                    <input type="password" value={password} onChange={(e) => { setPassword(e.target.value) }}/>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Taste : </TableCell>
-                                <TableCell>
-                                    <Rating name="tasteRating" value={tasteRating} onChange={(e, newValue) => { setTasteRating(newValue) }} />
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Distance : </TableCell>
-                                <TableCell>
-                                    <Rating name="distaceRating" value={distanceRating} onChange={(e, newValue) => { setDistanceRating(newValue) }} />
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Overall : </TableCell>
-                                <TableCell>
-                                    <Rating name="overallRating" value={overallRating} onChange={(e, newValue) => { setOverallRating(newValue) }} />
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Total Price : </TableCell>
-                                <TableCell>
-                                    <input type="number" value={totalPrice} onChange={(e) => { setTotalPrice(e.target.value) }}/>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Number of Customer : </TableCell>
-                                <TableCell>
-                                    <input type="number" value={numberOfCustomer} onChange={(e) => { setNumberOfCustomer(e.target.value) }}/>
-                                </TableCell>
-                            </TableRow>
+                            <SortTableHead
+                                order={order}
+                                orderBy={orderBy}
+                                onRequestSort={handleRequestSort}
+                            />
+                            <TableBody>
+                                {results !== null && stableSort(results, getComparator(order, orderBy)).map((item, index) => {
+                                    return <LocationItem
+                                        key={index}
+                                        click={(e) => clickHandler(index, item)}
+                                        {...item}
+                                        index={numToSSColumn(index + 1)}
+                                        name={item.Name}
+                                        vicinity={item.Address}
+                                        rating={item.TotalRate ? item.TotalRate : 0}
+                                        distance={item.Distance}
+                                        recommend={item.HostRecommendation}
+                                        selected={item.selected}
+                                    />
+                                })}
+                            </TableBody>
                         </Table>
                     </TableContainer>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={() => {addReviews(); dialogClose();}}>Submit</Button>
-                    <Button onClick={() => {dialogClose();}}>Cancel</Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-
-
-    );
+    
+                    <div class="results">
+                    </div>
+                </div>
+                <div id="map" className={openDetail ? classes.mapOpened : classes.mapNotOpened}>
+                    test
+                </div>
+    
+                <div className={openDetail ? classes.detailItemOpened : classes.detailItemNotOpened}>
+                    {/* <DetailItem
+                        name="피자에땅 경대점"
+                        address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
+                        phone_number="053-939-2277"
+                        distance="598m"
+                        total_rate={4.2}
+                        distance_rate={5}
+                        taste_rate={3.4}
+                        clickRate={() => dialogOpen()}
+                    /> */}
+                    {(results !== null && <DetailItem
+                        // name={results[selectedIndex].name}
+                        // address={results[selectedIndex].vicinity}
+                        // phone_number={results[selectedIndex].PhoneNumber} _NEW
+                        // distance={results[selectedIndex].distance}
+                        // total_rate={results[selectedIndex].rating ? results[selectedIndex].rating : 0}
+                        // distance_rate={results[selectedIndex].DistanceRate} _NEW
+                        // taste_rate={results[selectedIndex].TasteRate} _NEW
+                        {...results[selectedIndex]}
+                        request_type = {request_type}
+                        clickBtn={() => dialogOpen()}
+                        reviews = {reviews}
+                        selectedIndex = {selectedIndex}
+                        selectedID = {selectedIndex}
+                        btnName="Rate!"
+                    />)}
+                </div>
+    
+                <Dialog
+                    open={dialog}
+                    onClose={dialogClose}
+                >
+                    <DialogTitle>
+                        Rate
+                    </DialogTitle>
+    
+                    <DialogContent>
+                        <TableContainer>
+                            <Table>
+                                <TableRow>
+                                    <TableCell>Name : </TableCell>
+                                    <TableCell>
+                                        <input type="text" value={userName} onChange={(e) => { setUserName(e.target.value) }}/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>password : </TableCell>
+                                    <TableCell>
+                                        <input type="password" value={password} onChange={(e) => { setPassword(e.target.value) }}/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Taste : </TableCell>
+                                    <TableCell>
+                                        <Rating name="tasteRating" value={tasteRating} onChange={(e, newValue) => { setTasteRating(newValue) }} />
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Distance : </TableCell>
+                                    <TableCell>
+                                        <Rating name="distaceRating" value={distanceRating} onChange={(e, newValue) => { setDistanceRating(newValue) }} />
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Overall : </TableCell>
+                                    <TableCell>
+                                        <Rating name="overallRating" value={overallRating} onChange={(e, newValue) => { setOverallRating(newValue) }} />
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Total Price : </TableCell>
+                                    <TableCell>
+                                        <input type="number" value={totalPrice} onChange={(e) => { setTotalPrice(e.target.value) }}/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Number of Customer : </TableCell>
+                                    <TableCell>
+                                        <input type="number" value={numberOfCustomer} onChange={(e) => { setNumberOfCustomer(e.target.value) }}/>
+                                    </TableCell>
+                                </TableRow>
+                            </Table>
+                        </TableContainer>
+                    </DialogContent>
+    
+                    <DialogActions>
+                        <Button onClick={() => {addReviews(); dialogClose();}}>Submit</Button>
+                        <Button onClick={() => {dialogClose();}}>Cancel</Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
+    
+    
+        );
+    }
+    else if (request_type == 'tourist_attraction'){
+        return (
+            // <div style={{ display: 'flex' }}>
+            <div className={classes.root}>
+    
+                <div className={classes.leftMenu}>
+                    {/* <ButtonGroup variant="contained" color="inherit" aria-label="contained primary button group" className={classes.buttonGroup}>
+                        <Button color="inherit" onClick={getRestaurant}>Restaurant</Button>
+                        <Button color="inherit">Attraction</Button>
+                        <Button color="inherit">Event</Button>
+                    </ButtonGroup> */}
+                    <Divider />
+                    {/* <List>
+                        {results !== null && results.map((item, index) => {
+                            return <><LocationItem
+                                key={index}
+                                click={(e) => clickHandler(index, item)}
+                                {...item}
+                                index={numToSSColumn(index + 1)}
+                            // name={item.name}
+                            // vicinity={item.vicinity}
+                            // rating={item.rating}
+                            // selected={item.selected}
+                            /><Divider /></>
+                        })}
+                    </List> */}
+                    <TableContainer>
+                        <Table>
+                            <SortTableHead
+                                order={order}
+                                orderBy={orderBy}
+                                onRequestSort={handleRequestSort}
+                            />
+                            <TableBody>
+                                {results !== null && stableSort(results, getComparator(order, orderBy)).map((item, index) => {
+                                    return <LocationItem
+                                        key={index}
+                                        click={(e) => clickHandler(index, item)}
+                                        {...item}
+                                        index={numToSSColumn(index + 1)}
+                                        name={item.Name}
+                                        vicinity={item.Address}
+                                        rating={item.TotalRate ? item.TotalRate : 0}
+                                        distance={item.Distance}
+                                        recommend={item.HostRecommendation}
+                                        selected={item.selected}
+                                    />
+                                })}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+    
+                    <div class="results">
+                    </div>
+                </div>
+                <div id="map" className={openDetail ? classes.mapOpened : classes.mapNotOpened}>
+                    test
+                </div>
+    
+                <div className={openDetail ? classes.detailItemOpened : classes.detailItemNotOpened}>
+                    {/* <DetailItem
+                        name="피자에땅 경대점"
+                        address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
+                        phone_number="053-939-2277"
+                        distance="598m"
+                        total_rate={4.2}
+                        distance_rate={5}
+                        taste_rate={3.4}
+                        clickRate={() => dialogOpen()}
+                    /> */}
+                    {(results !== null && <DetailItem
+                        // name={results[selectedIndex].name}
+                        // address={results[selectedIndex].vicinity}
+                        // phone_number={results[selectedIndex].PhoneNumber} _NEW
+                        // distance={results[selectedIndex].distance}
+                        // total_rate={results[selectedIndex].rating ? results[selectedIndex].rating : 0}
+                        // distance_rate={results[selectedIndex].DistanceRate} _NEW
+                        // taste_rate={results[selectedIndex].TasteRate} _NEW
+                        {...results[selectedIndex]}
+                        request_type = {request_type}
+                        clickBtn={() => dialogOpen()}
+                        reviews = {reviews}
+                        selectedIndex = {selectedIndex}
+                        selectedID = {selectedIndex}
+                        btnName="Rate!"
+                    />)}
+                </div>
+    
+                <Dialog
+                    open={dialog}
+                    onClose={dialogClose}
+                >
+                    <DialogTitle>
+                        Rate
+                    </DialogTitle>
+    
+                    <DialogContent>
+                        <TableContainer>
+                            <Table>
+                                <TableRow>
+                                    <TableCell>Name : </TableCell>
+                                    <TableCell>
+                                        <input type="text" value={userName} onChange={(e) => { setUserName(e.target.value) }}/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>password : </TableCell>
+                                    <TableCell>
+                                        <input type="password" value={password} onChange={(e) => { setPassword(e.target.value) }}/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Satisfaction : </TableCell>
+                                    <TableCell>
+                                        <Rating name="SatisfactionRate" value={satisfactionRate} onChange={(e, newValue) => { setSatisfactionRate(newValue) }} />
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Distance : </TableCell>
+                                    <TableCell>
+                                        <Rating name="distaceRating" value={distanceRating} onChange={(e, newValue) => { setDistanceRating(newValue) }} />
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Overall : </TableCell>
+                                    <TableCell>
+                                        <Rating name="overallRating" value={overallRating} onChange={(e, newValue) => { setOverallRating(newValue) }} />
+                                    </TableCell>
+                                </TableRow>
+                            </Table>
+                        </TableContainer>
+                    </DialogContent>
+    
+                    <DialogActions>
+                        <Button onClick={() => {addReviews(); dialogClose();}}>Submit</Button>
+                        <Button onClick={() => {dialogClose();}}>Cancel</Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
+    
+    
+        );
+    }
 };
 
 const SortTableHead = (props) => {
@@ -731,7 +922,6 @@ const SortTableHead = (props) => {
     const createSortHandler = (property) => (event) => {
         onRequestSort(event, property)
     }
-
     return (
         <TableHead>
             <TableRow>
@@ -796,149 +986,296 @@ const LocationItem = (props) => {
 
 const DetailItem = (props) => {
     const classes = useStyles();
-    return (
-        <>
-            <TableContainer>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell style={{width: 130}}>
-                                Kind
-                            </TableCell>
-                            <TableCell>
-                                Value
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        <TableRow>
-                            <TableCell>
-                                NAME
-                            </TableCell>
-                            <TableCell>
-                                {props.Name}
-                            </TableCell>
-                        </TableRow>
-
-                        <TableRow>
-                            <TableCell>
-                                ADDRESS
-                            </TableCell>
-                            <TableCell>
-                                {/* {props.address} */}
-                                {props.Address}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                PHONE<br />NUMBER
-                            </TableCell>
-                            <TableCell>
-                                {props.PhoneNumber}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                DISTANCE
-                            </TableCell>
-                            <TableCell>
-                                {props.Distance >= 1000 ? Math.round((props.Distance) / 100) / 10 + 'km' : props.Distance + 'm'}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                TOTAL<br />RATE
-                            </TableCell>
-                            <TableCell>
-                                {props.TotalRate}
-                                {/* {props.rating} */}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                ACCESSIBILITY<br />RATE
-                            </TableCell>
-                            <TableCell>
-                                {props.DistanceRate}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                TASTE<br />RATE
-                            </TableCell>
-                            <TableCell>
-                                {props.TasteRate}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                AVERAGE<br />PRICE
-                            </TableCell>
-                            <TableCell>
-                                {props.AveragePrice}
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-                <br/>
-                💎Reviews
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                NickName
-                            </TableCell>
-                            <TableCell>
-                                Taste
-                            </TableCell>
-                            <TableCell>
-                                Distance
-                            </TableCell>
-                            <TableCell>
-                                Overall
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {props.reviews !== [] && props.reviews.map((item, index) => {
-                            if (item.index == props.PlaceID) {
-                                return <ReviewItem
-                                username = {item.username}
-                                tasteRating = {item.tasteRating}
-                                distanceRating = {item.distanceRating}
-                                overallRating = {item.overallRating}
-                            />
-                            }
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Button onClick={() => props.clickBtn()}>
-                {props.btnName}
-            </Button>
-        </>
-
-    )
+    if (props.request_type == 'restaurant') {
+        return (
+            <>
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={{width: 130}}>
+                                    Kind
+                                </TableCell>
+                                <TableCell>
+                                    Value
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell>
+                                    NAME
+                                </TableCell>
+                                <TableCell>
+                                    {props.Name}
+                                </TableCell>
+                            </TableRow>
+    
+                            <TableRow>
+                                <TableCell>
+                                    ADDRESS
+                                </TableCell>
+                                <TableCell>
+                                    {/* {props.address} */}
+                                    {props.Address}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    PHONE<br />NUMBER
+                                </TableCell>
+                                <TableCell>
+                                    {props.PhoneNumber}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    DISTANCE
+                                </TableCell>
+                                <TableCell>
+                                    {props.Distance >= 1000 ? Math.round((props.Distance) / 100) / 10 + 'km' : props.Distance + 'm'}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    TOTAL<br />RATE
+                                </TableCell>
+                                <TableCell>
+                                    {props.TotalRate}
+                                    {/* {props.rating} */}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    ACCESSIBILITY<br />RATE
+                                </TableCell>
+                                <TableCell>
+                                    {props.DistanceRate}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    TASTE<br />RATE
+                                </TableCell>
+                                <TableCell>
+                                    {props.TasteRate}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    AVERAGE<br />PRICE
+                                </TableCell>
+                                <TableCell>
+                                    {props.AveragePrice}
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                    <br/>
+                    💎Reviews
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>
+                                    NickName
+                                </TableCell>
+                                <TableCell>
+                                    Taste
+                                </TableCell>
+                                <TableCell>
+                                    Distance
+                                </TableCell>
+                                <TableCell>
+                                    Overall
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {props.reviews !== [] && props.reviews.map((item, index) => {
+                                if (item.index == props.PlaceID) {
+                                    return <ReviewItem
+                                    request_type = 'restaurant'
+                                    username = {item.username}
+                                    tasteRating = {item.tasteRating}
+                                    distanceRating = {item.distanceRating}
+                                    overallRating = {item.overallRating}
+                                />
+                                }
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <Button onClick={() => props.clickBtn()}>
+                    {props.btnName}
+                </Button>
+            </>
+        )
+    }
+    else if (props.request_type == 'tourist_attraction') {
+        return (
+            <>
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={{width: 130}}>
+                                    Kind
+                                </TableCell>
+                                <TableCell>
+                                    Value
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell>
+                                    NAME
+                                </TableCell>
+                                <TableCell>
+                                    {props.Name}
+                                </TableCell>
+                            </TableRow>
+    
+                            <TableRow>
+                                <TableCell>
+                                    ADDRESS
+                                </TableCell>
+                                <TableCell>
+                                    {/* {props.address} */}
+                                    {props.Address}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    PHONE<br />NUMBER
+                                </TableCell>
+                                <TableCell>
+                                    {props.PhoneNumber}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    DISTANCE
+                                </TableCell>
+                                <TableCell>
+                                    {props.Distance >= 1000 ? Math.round((props.Distance) / 100) / 10 + 'km' : props.Distance + 'm'}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    TOTAL<br />RATE
+                                </TableCell>
+                                <TableCell>
+                                    {props.TotalRate}
+                                    {/* {props.rating} */}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    ACCESSIBILITY<br />RATE
+                                </TableCell>
+                                <TableCell>
+                                    {props.DistanceRate}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    SATISFACTION<br />RATE
+                                </TableCell>
+                                <TableCell>
+                                    {props.SatisfactionRate}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    FEE
+                                </TableCell>
+                                <TableCell>
+                                    {props.Fees ? "Payment exists" : "Free"}
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                    <br/>
+                    💎Reviews
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>
+                                    NickName
+                                </TableCell>
+                                <TableCell>
+                                    Satisfaction
+                                </TableCell>
+                                <TableCell>
+                                    Distance
+                                </TableCell>
+                                <TableCell>
+                                    Overall
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {props.reviews !== [] && props.reviews.map((item, index) => {
+                                if (item.index == props.PlaceID) {
+                                    return <ReviewItem
+                                    request_type = 'tourist_attraction'
+                                    username = {item.username}
+                                    satisfactionRating = {item.satisfactionRate}
+                                    distanceRating = {item.distanceRating}
+                                    overallRating = {item.overallRating}
+                                />
+                                }
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <Button onClick={() => props.clickBtn()}>
+                    {props.btnName}
+                </Button>
+            </>
+        )
+    }
 }
 
 const ReviewItem = (props) => {
     const classes = useStyles();
-    return (
-        <TableRow>
-            <TableCell className={classes.tableTextAlign} >
-                {props.username}
-            </TableCell>
-            <TableCell className={classes.tableTextAlign}>
-                {props.tasteRating}
-            </TableCell>
-            <TableCell className={classes.tableTextAlign} >
-                {props.distanceRating}
-            </TableCell>
-            <TableCell className={classes.tableTextAlign} >
-                {props.overallRating}
-            </TableCell>
-        </TableRow>
-    )
+    if (props.request_type == 'restaurant') {
+        return (
+            <TableRow>
+                <TableCell className={classes.tableTextAlign} >
+                    {props.username}
+                </TableCell>
+                <TableCell className={classes.tableTextAlign}>
+                    {props.tasteRating}
+                </TableCell>
+                <TableCell className={classes.tableTextAlign} >
+                    {props.distanceRating}
+                </TableCell>
+                <TableCell className={classes.tableTextAlign} >
+                    {props.overallRating}
+                </TableCell>
+            </TableRow>
+        )
+    }
+    else if (props.request_type == 'tourist_attraction') {
+        return (
+            <TableRow>
+                <TableCell className={classes.tableTextAlign} >
+                    {props.username}
+                </TableCell>
+                <TableCell className={classes.tableTextAlign}>
+                    {props.satisfactionRating}
+                </TableCell>
+                <TableCell className={classes.tableTextAlign} >
+                    {props.distanceRating}
+                </TableCell>
+                <TableCell className={classes.tableTextAlign} >
+                    {props.overallRating}
+                </TableCell>
+            </TableRow>
+        )
+    }
 }
 
 export default Map;
