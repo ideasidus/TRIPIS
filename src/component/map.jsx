@@ -78,7 +78,9 @@ const useStyles = makeStyles((theme) => ({
     tableNotSelected: {
         backgroundColor: '#ffffff',
     },
-
+    tableRecommeded: {
+        backgroundColor: '#ffffa3'
+    },
     rateDialog: {
         justifyContent: 'center',
     },
@@ -562,6 +564,7 @@ const Map = (props) => {
                                     vicinity={item.Address}
                                     rating={item.TotalRate ? item.TotalRate : 0}
                                     distance={item.Distance}
+                                    recommend={item.HostRecommendation}
                                     selected={item.selected}
                                 />
                             })}
@@ -714,7 +717,7 @@ const LocationItem = (props) => {
         //     </div>
         // </ListItem>
         // <TableRow onClick={props.click} style={{backgroundColor: props.selected ? '#808080' : '#ffffff'}}>
-        <TableRow onClick={props.click} className={props.selected ? classes.tableSelected : classes.tableNotSelected}>
+        <TableRow onClick={props.click} className={props.selected ? classes.tableSelected : (props.recommend ? classes.tableRecommeded : classes.tableNotSelected)}>
             <TableCell className={classes.tableTextAlign} >
                 {props.index}
             </TableCell>
