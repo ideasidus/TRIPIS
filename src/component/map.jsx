@@ -870,6 +870,14 @@ const DetailItem = (props) => {
                                 {props.TasteRate}
                             </TableCell>
                         </TableRow>
+                        <TableRow>
+                            <TableCell>
+                                AVERAGE<br />PRICE
+                            </TableCell>
+                            <TableCell>
+                                {props.AveragePrice}
+                            </TableCell>
+                        </TableRow>
                     </TableBody>
                 </Table>
                 <br/>
