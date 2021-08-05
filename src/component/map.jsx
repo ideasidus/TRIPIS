@@ -10,6 +10,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 import { findRestaurant as LS2getRestaurant, findRestaurantReview, findAttractionReview} from "../LS2Request/Find";
 import { putRestaurantReview, putAttractionReview } from "../LS2Request/Put";
+import { mergeRestaurant } from "../LS2Request/Merge";
 
 // import GoogleMapReact from "google-map-react";
 // import axios from "axios";
@@ -118,6 +119,9 @@ const Map = (props) => {
     const [distanceRating, setDistanceRating] = useState(5);
     const [overallRating, setOverallRating] = useState(5);
     const [userName, setUserName] = useState('');
+    const [password, setPassword] = useState('');
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [numberOfCustomer, setNumberOfCustomer] = useState(0);
     const [reviews, setReviews] = useState([]);
 
     const [order, setOrder] = useState('asc');
@@ -448,15 +452,47 @@ const Map = (props) => {
         const reviewData = {
             "PlaceID": results[selectedIndex].PlaceID,
             "UserName": userName,
-            "Password": '1234',  // DummyData
+            "Password": password,
             "TasteRate": tasteRating,
             "DistanceRate": distanceRating,
             "TotalRate": overallRating,
-            "TotalPrice": 19900,  // DummyData
-            "NumberOfCustomer": 2,  // DummyData
+            "TotalPrice": parseInt(totalPrice),  // DummyData
+            "NumberOfCustomer": parseInt(numberOfCustomer)  // DummyData
         }
         if (request_type == 'restaurant') {
             putRestaurantReview(reviewData)  // add to Database
+            setResults((prev) => prev.map((v, i) => {
+                if (v.PlaceID === results[selectedIndex].PlaceID) {
+                    const prevNOC = v.NumberOFCustomer
+                    const prevNOR = v.NumberOfRate
+                    const newNOC = v.NumberOFCustomer + parseInt(numberOfCustomer)
+                    const newNOR = v.NumberOfRate + 1
+                    const newData = {
+                        PlaceID: v.PlaceID,
+                        newNOC: newNOC,
+                        newNOR: newNOR,
+                        newPrice: parseInt(((v.AveragePrice * prevNOC + parseInt(totalPrice)) / newNOC).toFixed(0)),
+                        newTaste: parseFloat(((v.TasteRate * prevNOR + tasteRating) / newNOR).toFixed(1)),
+                        newDist: parseFloat(((v.DistanceRate * prevNOR + distanceRating) / newNOR).toFixed(1)),
+                        newTotal: parseFloat(((v.TotalRate * prevNOR + overallRating) / newNOR).toFixed(1))
+                    }
+                    console.log("newData : ", newData)
+                    mergeRestaurant(newData)  // merge DB1
+                    return {
+                        ...v,
+                        NumberOFCustomer: newData.newNOC,
+                        NumberOfRate: newData.newNOR,
+                        AveragePrice: newData.newPrice,
+                        TasteRate: newData.newTaste,
+                        DistanceRate: newData.newDist,
+                        TotalRate: newData.newTotal
+                    }
+                } else {
+                    return {
+                        ...v
+                    }
+                }
+            }))
         }
         else if (request_type == 'tourist_attraction') {
             putAttractionReview(reviewData)
@@ -464,11 +500,15 @@ const Map = (props) => {
         setReviews(reviews.concat([{
             index: results[selectedIndex].PlaceID,
             username: userName,
+            password: password,
             tasteRating: tasteRating,
             distanceRating: distanceRating,
-            overallRating: overallRating
+            overallRating: overallRating,
+            totalPrice: totalPrice,
+            numberOfCustomer: numberOfCustomer
         }]));
         setUserName('')
+        setPassword('')
     }
 
     return (
@@ -574,6 +614,12 @@ const Map = (props) => {
                                 </TableCell>
                             </TableRow>
                             <TableRow>
+                                <TableCell>password : </TableCell>
+                                <TableCell>
+                                    <input type="password" value={password} onChange={(e) => { setPassword(e.target.value) }}/>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
                                 <TableCell>Taste : </TableCell>
                                 <TableCell>
                                     <Rating name="tasteRating" value={tasteRating} onChange={(e, newValue) => { setTasteRating(newValue) }} />
@@ -589,6 +635,18 @@ const Map = (props) => {
                                 <TableCell>Overall : </TableCell>
                                 <TableCell>
                                     <Rating name="overallRating" value={overallRating} onChange={(e, newValue) => { setOverallRating(newValue) }} />
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Price : </TableCell>
+                                <TableCell>
+                                    <input type="number" value={totalPrice} onChange={(e) => { setTotalPrice(e.target.value) }}/>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Number of Customer : </TableCell>
+                                <TableCell>
+                                    <input type="number" value={numberOfCustomer} onChange={(e) => { setNumberOfCustomer(e.target.value) }}/>
                                 </TableCell>
                             </TableRow>
                         </Table>

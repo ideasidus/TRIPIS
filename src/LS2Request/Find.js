@@ -87,17 +87,17 @@ export const findRestaurant = () => {
         // for test
         // return [{
         //     status: 'success', data: [{
-        //         Address: 'Test Address', AveragePrice: 100, Distance: 1000,
+        //         Address: 'Test Address', AveragePrice: 10000, Distance: 1000,
         //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.8709543,
-        //         Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 8,
-        //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
-        //         TasterRate: 3.5, TotalRate: 4, HostRecommendation: true,
+        //         Longitude: 128.598092, Name: 'Novotel Ambassador Daegu', NumberOFCustomer: 2,
+        //         NumberOfRate: 1, PhoneNumber: "None", PlaceID: 'ChIJyychK8XjZTURs6UKGVhF1-s',
+        //         TasteRate: 3.5, TotalRate: 4, HostRecommendation: true,
         //     }, {
-        //         Address: 'Test Address2', AveragePrice: 100, Distance: 1500,
+        //         Address: 'Test Address2', AveragePrice: 10000, Distance: 1500,
         //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.8674918,
-        //         Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 8,
-        //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
-        //         TasterRate: 3.5, TotalRate: 3.2, HostRecommendation: false,
+        //         Longitude: 128.5966119, Name: '배스킨라빈스 대구동인', NumberOFCustomer: 2,
+        //         NumberOfRate: 1, PhoneNumber: "None", PlaceID: 'ChIJgd5ZPcTjZTURhIDk2qKpq5A',
+        //         TasteRate: 3.5, TotalRate: 3.2, HostRecommendation: false,
         //     }]
         // }, []]
 
@@ -154,21 +154,21 @@ export const findAttraction = () => {
     })
 
     return Promise.all([recommend, notRecommend]).then((results) => {
-        //for test
+        // for test
         // return [{
         //     status: 'success', data: [{
         //         Address: 'Test Address', AveragePrice: 100, Distance: 1000,
         //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.86926,
         //         Longitude: 128.6050364, Name: 'National Bond Compensation Movement Memorial Park', NumberOFCustomer: 8,
         //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJzaeJxonhZTURTBQJ3QyYmjw',
-        //         TasterRate: 3.5, TotalRate: 4
+        //         TasteRate: 3.5, TotalRate: 4
         //     }, 
         //     {
         //         Address: 'Test Address2', AveragePrice: 100, Distance: 1500,
         //         DistanceRate: 2, HostRecommendation: true, Latitude: 35.8596038,
         //         Longitude: 128.596001, Name: '대구향교', NumberOFCustomer: 8,
         //         NumberOfRate: 3, PhoneNumber: "None", PlaceID: 'ChIJ1_tDJbnjZTURL7vyjp7UY0o',
-        //         TasterRate: 3.5, TotalRate: 3.2
+        //         TasteRate: 3.5, TotalRate: 3.2
         //     }
         // ]
         // }, []]
@@ -202,6 +202,7 @@ export const findRestaurantReview = () => {
     })
 
     return Promise.all([reviewData]).then((results) => {
+        // for test
         // return [{status: 'success', data: [{
         //     "PlaceID": "ChIJyychK8XjZTURs6UKGVhF1-s",
         //     "UserName": "asdf",
