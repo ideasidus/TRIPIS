@@ -8,7 +8,7 @@ import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
-import { findRestaurant as LS2getRestaurant, findRestaurantReview, findAttractionReview} from "../LS2Request/Find";
+import { findRestaurant as LS2getRestaurant, findAttraction as LS2getAttraction, findRestaurantReview, findAttractionReview} from "../LS2Request/Find";
 import { putRestaurantReview, putAttractionReview } from "../LS2Request/Put";
 import { mergeRestaurant } from "../LS2Request/Merge";
 
@@ -21,7 +21,8 @@ import { mergeRestaurant } from "../LS2Request/Merge";
 
 /* eslint-disable no-undef */
 
-const center = { lat: 40.7483475, lng: -73.9864422 };
+// let center = { lat: 40.7598237, lng: -73.996455 };
+let center = { Latitude: 0, Longitude: 0 };
 
 const useStyles = makeStyles((theme) => ({
     // root: {
@@ -79,7 +80,9 @@ const useStyles = makeStyles((theme) => ({
     tableNotSelected: {
         backgroundColor: '#ffffff',
     },
-
+    tableRecommeded: {
+        backgroundColor: '#ffffa3'
+    },
     rateDialog: {
         justifyContent: 'center',
     },
@@ -108,7 +111,7 @@ const Map = (props) => {
     //   const mapEl = document.getElementById('map');
     const classes = useStyles();
     const request_type = props.type
-
+    center = props.center
     const [results, setResults] = useState([]);
     const [markers, setMarkers] = useState([]);
     const [mapState, setMapState] = useState(null);
@@ -219,8 +222,8 @@ const Map = (props) => {
 
             setResults((prev) => results.map((item) => (
                 item.rating
-                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.Longitude, center.Latitude])) })
+                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.Longitude, center.Latitude])) })
             )));
         })
     }
@@ -340,8 +343,54 @@ const Map = (props) => {
                 setMarkers((prev) => tAllMarkers);
                 setResults((prev) => totalRestaurant);
 
-                if (totalRestaurant[0].Latitude != null && totalRestaurant[0].Longitube != null) {
-                    map.setCenter({lat: totalRestaurant[0].Latitude, lng: totalRestaurant[0].Longitube});
+                if (totalRestaurant[0].Latitude != null && totalRestaurant[0].Longitude != null) {
+                    map.setCenter({lat: totalRestaurant[0].Latitude, lng: totalRestaurant[0].Longitude});
+                }
+
+                return;
+            })
+            // .then(() => {
+            //     let tAllMarkers = [];
+            //     for (let i = 0; i < results.length; i++) {
+            //         var marker = createMarker(results[i], i);
+            //         tAllMarkers.push(marker);
+            //     }
+
+            //     console.log('in initRestaurant', tAllMarkers)
+            //     setMarkers((prev) => tAllMarkers);
+
+
+            //     if (results[0].Latitude != null && results[0].Longitube != null) {
+            //         map.setCenter({lat: results[0].Latitude, lng: results[0].Longitube});
+            //     }
+
+            // })
+        }
+        const initAttraction = () => {
+            LS2getAttraction().then(async (db_results) => {
+                console.log('getLS2Attraction results',db_results)
+
+                const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => Object.assign({}, item, {selected: false})) : [] 
+                const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => Object.assign({}, item, {selected: false})) : []
+                
+                console.log('rec',recommend)
+                console.log('not',notRecommend)
+                return await recommend.concat(notRecommend);
+            }).then((totalAttraction) => {
+                console.log('totalAttraction', totalAttraction)
+
+                let tAllMarkers = [];
+                for (let i = 0; i < totalAttraction.length; i++) {
+                    var marker = createMarker(totalAttraction[i], i);
+                    tAllMarkers.push(marker);
+                }
+
+                console.log('in initAttraction', tAllMarkers)
+                setMarkers((prev) => tAllMarkers);
+                setResults((prev) => totalAttraction);
+
+                if (totalAttraction[0].Latitude != null && totalAttraction[0].Longitude != null) {
+                    map.setCenter({lat: totalAttraction[0].Latitude, lng: totalAttraction[0].Longitude});
                 }
 
                 return;
@@ -402,12 +451,12 @@ const Map = (props) => {
 
         const initMap = () => {
             map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: center.lat, lng: center.lng },
+                center: { lat: center.Latitude, lng: center.Longitude },
                 zoom: 15,
             })
 
             service = new google.maps.places.PlacesService(map);
-            location = new google.maps.LatLng(center.lat, center.lng)
+            location = new google.maps.LatLng(center.Latitude, center.Longitude)
             infowindow = new google.maps.InfoWindow();
 
             const svgMarker = {
@@ -420,18 +469,20 @@ const Map = (props) => {
                 anchor: new google.maps.Point(15, 30),
             };
             new google.maps.Marker({
-                position: { lat: center.lat, lng: center.lng },
+                position: { lat: center.Latitude, lng: center.Longitude },
                 icon: svgMarker,
                 map: map,
             });
 
-            initRestaurant();
             // getDumiRestaurant(request_type)
-            if (request_type == 'restaurant')
+            if (request_type == 'restaurant'){
+                initRestaurant();
                 initRestaurantReview();
-            if (request_type == 'tourist_attraction')
+            }
+            if (request_type == 'tourist_attraction'){
+                initAttraction();
                 initAttractionReview();
-
+            }
         }
         initMap()
         // setMapState((prev) => map)
@@ -554,6 +605,7 @@ const Map = (props) => {
                                     vicinity={item.Address}
                                     rating={item.TotalRate ? item.TotalRate : 0}
                                     distance={item.Distance}
+                                    recommend={item.HostRecommendation}
                                     selected={item.selected}
                                 />
                             })}
@@ -724,7 +776,7 @@ const LocationItem = (props) => {
         //     </div>
         // </ListItem>
         // <TableRow onClick={props.click} style={{backgroundColor: props.selected ? '#808080' : '#ffffff'}}>
-        <TableRow onClick={props.click} className={props.selected ? classes.tableSelected : classes.tableNotSelected}>
+        <TableRow onClick={props.click} className={props.selected ? classes.tableSelected : (props.recommend ? classes.tableRecommeded : classes.tableNotSelected)}>
             <TableCell className={classes.tableTextAlign} >
                 {props.index}
             </TableCell>
