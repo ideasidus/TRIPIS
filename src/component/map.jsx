@@ -20,7 +20,8 @@ import { putRestaurantReview, putAttractionReview } from "../LS2Request/Put";
 
 /* eslint-disable no-undef */
 
-const center = { lat: 40.7483475, lng: -73.9864422 };
+// let center = { lat: 40.7598237, lng: -73.996455 };
+let center = { Latitude: 0, Longitude: 0 };
 
 const useStyles = makeStyles((theme) => ({
     // root: {
@@ -109,7 +110,7 @@ const Map = (props) => {
     //   const mapEl = document.getElementById('map');
     const classes = useStyles();
     const request_type = props.type
-
+    center = props.center
     const [results, setResults] = useState([]);
     const [markers, setMarkers] = useState([]);
     const [mapState, setMapState] = useState(null);
@@ -217,8 +218,8 @@ const Map = (props) => {
 
             setResults((prev) => results.map((item) => (
                 item.rating
-                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
-                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.lng, center.lat])) })
+                    ? Object.assign(item, { selected: false, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.Longitude, center.Latitude])) })
+                    : Object.assign(item, { selected: false, rating: 0, distance: Math.round(haversine([item.geometry.location.lng(), item.geometry.location.lat()], [center.Longitude, center.Latitude])) })
             )));
         })
     }
@@ -338,8 +339,8 @@ const Map = (props) => {
                 setMarkers((prev) => tAllMarkers);
                 setResults((prev) => totalRestaurant);
 
-                if (totalRestaurant[0].Latitude != null && totalRestaurant[0].Longitube != null) {
-                    map.setCenter({lat: totalRestaurant[0].Latitude, lng: totalRestaurant[0].Longitube});
+                if (totalRestaurant[0].Latitude != null && totalRestaurant[0].Longitude != null) {
+                    map.setCenter({lat: totalRestaurant[0].Latitude, lng: totalRestaurant[0].Longitude});
                 }
 
                 return;
@@ -384,8 +385,8 @@ const Map = (props) => {
                 setMarkers((prev) => tAllMarkers);
                 setResults((prev) => totalAttraction);
 
-                if (totalAttraction[0].Latitude != null && totalAttraction[0].Longitube != null) {
-                    map.setCenter({lat: totalAttraction[0].Latitude, lng: totalAttraction[0].Longitube});
+                if (totalAttraction[0].Latitude != null && totalAttraction[0].Longitude != null) {
+                    map.setCenter({lat: totalAttraction[0].Latitude, lng: totalAttraction[0].Longitude});
                 }
 
                 return;
@@ -446,12 +447,12 @@ const Map = (props) => {
 
         const initMap = () => {
             map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: center.lat, lng: center.lng },
+                center: { lat: center.Latitude, lng: center.Longitude },
                 zoom: 15,
             })
 
             service = new google.maps.places.PlacesService(map);
-            location = new google.maps.LatLng(center.lat, center.lng)
+            location = new google.maps.LatLng(center.Latitude, center.Longitude)
             infowindow = new google.maps.InfoWindow();
 
             const svgMarker = {
@@ -464,7 +465,7 @@ const Map = (props) => {
                 anchor: new google.maps.Point(15, 30),
             };
             new google.maps.Marker({
-                position: { lat: center.lat, lng: center.lng },
+                position: { lat: center.Latitude, lng: center.Longitude },
                 icon: svgMarker,
                 map: map,
             });
