@@ -8,7 +8,7 @@ import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
-import { findRestaurant as LS2getRestaurant, findRestaurantReview, findAttractionReview} from "../LS2Request/Find";
+import { findRestaurant as LS2getRestaurant, findAttraction as LS2getAttraction, findRestaurantReview, findAttractionReview} from "../LS2Request/Find";
 import { putRestaurantReview, putAttractionReview } from "../LS2Request/Put";
 
 // import GoogleMapReact from "google-map-react";
@@ -359,6 +359,52 @@ const Map = (props) => {
 
             // })
         }
+        const initAttraction = () => {
+            LS2getAttraction().then(async (db_results) => {
+                console.log('getLS2Attraction results',db_results)
+
+                const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => Object.assign({}, item, {selected: false})) : [] 
+                const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => Object.assign({}, item, {selected: false})) : []
+                
+                console.log('rec',recommend)
+                console.log('not',notRecommend)
+                return await recommend.concat(notRecommend);
+            }).then((totalAttraction) => {
+                console.log('totalAttraction', totalAttraction)
+
+                let tAllMarkers = [];
+                for (let i = 0; i < totalAttraction.length; i++) {
+                    var marker = createMarker(totalAttraction[i], i);
+                    tAllMarkers.push(marker);
+                }
+
+                console.log('in initAttraction', tAllMarkers)
+                setMarkers((prev) => tAllMarkers);
+                setResults((prev) => totalAttraction);
+
+                if (totalAttraction[0].Latitude != null && totalAttraction[0].Longitube != null) {
+                    map.setCenter({lat: totalAttraction[0].Latitude, lng: totalAttraction[0].Longitube});
+                }
+
+                return;
+            })
+            // .then(() => {
+            //     let tAllMarkers = [];
+            //     for (let i = 0; i < results.length; i++) {
+            //         var marker = createMarker(results[i], i);
+            //         tAllMarkers.push(marker);
+            //     }
+
+            //     console.log('in initRestaurant', tAllMarkers)
+            //     setMarkers((prev) => tAllMarkers);
+
+
+            //     if (results[0].Latitude != null && results[0].Longitube != null) {
+            //         map.setCenter({lat: results[0].Latitude, lng: results[0].Longitube});
+            //     }
+
+            // })
+        }
 
         const initRestaurantReview = () => {
             findRestaurantReview().then(async (db_results) => {
@@ -421,13 +467,15 @@ const Map = (props) => {
                 map: map,
             });
 
-            initRestaurant();
             // getDumiRestaurant(request_type)
-            if (request_type == 'restaurant')
+            if (request_type == 'restaurant'){
+                initRestaurant();
                 initRestaurantReview();
-            if (request_type == 'tourist_attraction')
+            }
+            if (request_type == 'tourist_attraction'){
+                initAttraction();
                 initAttractionReview();
-
+            }
         }
         initMap()
         // setMapState((prev) => map)

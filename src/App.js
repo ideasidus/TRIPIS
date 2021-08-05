@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react'
 
 import './App.css';
 import Map from './component/map'
-import AdminRestaurant from './component/admin/adminRestaurant'
+import AdminRestaurant from './component/admin/adminR'
 import AdminAttraction from './component/admin/adminAttraction';
 import Test from './component/test'
 import SideNav from './component/sideNav';

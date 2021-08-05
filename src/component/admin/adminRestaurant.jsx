@@ -3,19 +3,21 @@ import ClearIcon from '@material-ui/icons/Clear';
 import SearchIcon from '@material-ui/icons/Search';
 import UpdateIcon from '@material-ui/icons/Update';
 
-import haversine from 'haversine-distance'
-
 import { useSnackbar } from 'notistack';
 
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, IconButton, Divider, InputBase, Button, CircularProgress, Toolbar, Tooltip, Typography } from '@material-ui/core';
+import { Paper, IconButton, Divider, InputBase, Button, Tabs, CircularProgress, Toolbar, Tooltip, Typography, AppBar, Tab } from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid';
 import { useEffect } from 'react';
 
 import { DetailItem } from '../map';
 
-import { findRestaurant as LS2FindRestaurant } from '../../LS2Request/Find';
+import { findRestaurant as LS2FindRestaurant, findCenter } from '../../LS2Request/Find';
 import { putRestaurant } from '../../LS2Request/Put';
+import { useHistory } from 'react-router-dom';
+
+import haversine from 'haversine-distance'
+import { TabContext, TabList, TabPanel } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -69,39 +71,46 @@ const useStyles = makeStyles((theme) => ({
     UpdateListToolBarTitle: {
         flex: '1 1 100%',
     },
+    tabPanel: {
+        height: '90vh',
+        padding: 0,
+    }
 }))
 
 /* eslint-disable no-undef */
 
-const defaultCenter = { lat: 40.7483475, lng: -73.9864422 };
-
-const getCenter = () => {
-    // Select DB8 Code
-
-    // return null
-    return { name: 'Test!!', lat: 35.8692386, lng: 128.5919156 }
-}
-
-const AdminMap = (props) => {
+const AdminRestaurant = (props) => {
     let map, service, location, infowindow, geocoder, searchBox;
+    const { center } = props;
+    let history = useHistory();
+
     // let markers = [];
     const classes = useStyles()
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     const [input, setInput] = useState('');
-    const [markers, setMarkers] = useState([]);
-    const [center, setCenter] = useState(getCenter())
+    const [updateMarkers, setUpdateMarkers] = useState([]);
+    const [registMarkers, setRegistMarkers] = useState([]);
 
     const [search, setSearch] = useState([]);
-    const [selection, setSelection] = useState();
+    const [regist, setRegist] = useState([]);
 
     const [serviceState, setServiceState] = useState(null);
+    const [mapState, setMapState] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    const [tabValue, setTabValue] = useState('0');
+
+    console.log('in restaurant')
 
 
     const handleClear = () => {
         setInput('')
     }
+
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
 
     const action = key => (
         <Fragment>
@@ -117,7 +126,6 @@ const AdminMap = (props) => {
     }
 
     const centerMarker = (name, lat, lng, setting = true) => {
-        console.log('in centerMarker')
         const svgMarker = {
             path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
             fillColor: "blue",
@@ -134,123 +142,58 @@ const AdminMap = (props) => {
             map: map,
         })
         google.maps.event.addListener(marker, "click", () => showCenterInfoWindow(marker, name, lat, lng));
-
-        // if (!setting) {
-        //     showCenterInfoWindow(marker, name, lat, lng);
-        //     google.maps.event.addListener(marker, "click", () => showCenterInfoWindow(marker, name, lat, lng));
-        // }
-
     }
 
     const showCenterInfoWindow = (marker, name, lat, lng) => {
-        // let content = `<div>${place.name}</div>\
-        // <button onclick="setCenterPlace()">숙소로 등록하기!!</button>\
-        // `
-        // let content = `<div>${place.name}</div>\
-        // <button id="setCenterBtn">숙소로 등록하기!!</button>`
-
-
         let content = document.createElement('div');
         let nameEl = document.createElement('div');
         nameEl.innerText = name;
         content.appendChild(nameEl);
 
-        // let btnEl = document.createElement('button');
-        // btnEl.innerText = '숙소로 등록하기'
-        // btnEl.addEventListener('click', function () { setCenterPlace(lat, lng); })
-        // content.appendChild(btnEl)
-
         infowindow.setContent(content);
         infowindow.open(map, marker);
     }
 
-    // function setCenterPlace(lat, lng) {
-    //     console.log('setCenter', place)
-    //     // set db
-    //     setCenter({ lat: lat, lng: lng })
-    //     enqueueSnackbar('Set Center!!', { variant: 'success', autoHideDuration: 2000, action })
-    //     infowindow.close();
-    // }
-
-    const initMap = () => {
+    const initMap = async () => {
         map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: center.lat, lng: center.lng },
+            center: { lat: center.Latitude, lng: center.Longitude },
             zoom: 15,
         })
-
-        location = new google.maps.LatLng(center.lat, center.lng)
+        location = new google.maps.LatLng(center.Latitude, center.Longitude)
         service = new google.maps.places.PlacesService(map);
         infowindow = new google.maps.InfoWindow()
 
         setServiceState((prev) => service)
+        setMapState(map);
 
         infowindow.setContent()
 
-        centerMarker(center.name, center.lat, center.lng)
+        centerMarker(center.Name, center.Latitude, center.Longitude)
 
-        restaurantSearch(service, null);
-
-        // } else {
-        //     console.log('center is null')
-        //     map = new google.maps.Map(document.getElementById("map"), {
-        //         center: { lat: defaultCenter.lat, lng: defaultCenter.lng },
-        //         zoom: 15,
-        //     })
-
-        //     location = new google.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
-        //     service = new google.maps.places.PlacesService(map);
-        //     infowindow = new google.maps.InfoWindow()
-
-        //     console.log('in initMap serive', service)
-        //     setServiceState(service)
-
-        //     centerSearch();
-        // }
+        await getRestarant();
+        await restaurantSearch(service, null)
     }
 
-    const centerSearch = () => {
-        const searchInputEl = document.getElementById('input');
-        const searchBox = new google.maps.places.SearchBox(searchInputEl);
+    const getRestarant = () => {
+        console.log('start get restaurant')
 
-        map.addListener("bounds_changed", () => {
-            searchBox.setBounds(map.getBounds());
-        })
+        LS2FindRestaurant().then((db_results) => {
+            console.log('find result ', db_results)
+            const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data : []
+            const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data : []
 
-        searchBox.addListener("places_changed", () => {
-            const places = searchBox.getPlaces();
-            console.log('places : ', places)
+            let sumList = recommend.concat(notRecommend)
+            setRegist((prev) => sumList)
 
-            if (places.length === 0) {
-                return;
+            let tAllMarkers = [];
+            for (let i = 0; i < sumList.length; i++) {
+                var marker = createMarker(sumList[i], i);
+                tAllMarkers.push(marker);
             }
-
-            // clear marker
-            markers.forEach((marker) => {
-                marker.setMap(null);
-            });
-            setMarkers([]);
-
-            const bounds = new google.maps.LatLngBounds();
-            places.forEach((place) => {
-                if (!place.geometry || !place.geometry.location) {
-                    console.log('Returned place contains no geometry')
-                    return;
-                }
-                console.log('before centerMarker')
-                centerMarker(place.name, place.geometry.location.lat(), place.geometry.location.lng(), false)
-
-                // Info Window Section
-
-                if (place.geometry.viewport) {
-                    bounds.union(place.geometry.viewport);
-                } else {
-                    bounds.extend(place.geometry.location)
-                }
-            })
-            map.fitBounds(bounds)
-
+            setRegistMarkers(tAllMarkers);
         })
     }
+
 
     const restaurantSearch = (service, pageToken) => {
 
@@ -263,7 +206,7 @@ const AdminMap = (props) => {
 
         if (pageToken) {
             request = {
-                location: center,
+                location: { lat: center.Latitude, lng: center.Longitude },
                 radius: 2000,
                 type: 'restaurant',
                 language: 'en',
@@ -272,7 +215,7 @@ const AdminMap = (props) => {
         } else {
             console.log('init!!')
             request = {
-                location: center,
+                location: { lat: center.Latitude, lng: center.Longitude },
                 radius: 2000,
                 type: 'restaurant',
                 language: 'en',
@@ -281,10 +224,6 @@ const AdminMap = (props) => {
 
         service.nearbySearch(request, (results, status, pagetoken) => {
             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                // console.log('nearbySearch Result', results)
-                // console.log('pagetoken', pagetoken)
-
-                // await setSearch((prev) => prev.concat(results));
                 if (tmpResult === null) {
                     tmpResult = results;
                 } else {
@@ -296,102 +235,66 @@ const AdminMap = (props) => {
                     pagetoken.nextPage();
                 } else {
                     console.log('end!!')
-                    searchFiltering(tmpResult)
+                    setSearch((prev) => tmpResult);
+                    // searchFiltering(regist, tmpResult)
+                    setLoading(false);
                 }
-
-                // if (next_page_token !== null) {
-                //     console.log('next!!', next_page_token.o)
-                //     restaurantSearch(service, next_page_token.o)
-                // } else {
-                //     console.log('end!!')
-                //     searchFiltering()
-                // }
-                // let tAllMarkers = [];
-                // for (let i = 0; i < results.length; i++) {
-                //     var marker = createMarker(results[i], i);
-                //     tAllMarkers.push(marker);
-                // }
-
-
-                // if (results[0].geometry != null && results[0].geometry.location != null) {
-                //     map.setCenter(results[0].geometry.location);
-                // }
 
             }
 
-
-        })
-    }
-
-    const initSearchBox = () => {
-        const searchInputEl = document.getElementById('input');
-        const searchBox = new google.maps.places.SearchBox(searchInputEl);
-
-        // map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchInputEl);
-
-        map.addListener("bounds_changed", () => {
-            searchBox.setBounds(map.getBounds());
-        })
-
-        searchBox.addListener("places_changed", () => {
-            const places = searchBox.getPlaces();
-            console.log('places : ', places)
-
-            if (places.length === 0) {
-                return;
-            }
-
-            // clear marker
-            markers.forEach((marker) => {
-                marker.setMap(null);
-            });
-            setMarkers([]);
-
-            const bounds = new google.maps.LatLngBounds();
-            places.forEach((place) => {
-                if (!place.geometry || !place.geometry.location) {
-                    console.log('Returned place contains no geometry')
-                    return;
-                }
-
-                if (place.geometry.viewport) {
-                    bounds.union(place.geometry.viewport);
-                } else {
-                    bounds.extend(place.geometry.location)
-                }
-            })
-            map.fitBounds(bounds)
 
         })
     }
 
     const createMarker = (place, index) => {
-        const marker = new google.maps.Marker({
-            map: map,
-            position: place.geometry.location,
-            label: numToSSColumn(index + 1),
-        });
+        if (place.geometry) {
+            console.log('place geometry exist = update', mapState)
+            const marker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location,
+                label: numToSSColumn(index + 1),
+            });
 
-        google.maps.event.addListener(marker, "click", () => {
-            infowindow.setContent(place.name || "");
-            infowindow.open(map);
-        });
+            google.maps.event.addListener(marker, "click", () => {
+                infowindow.setContent(place.name || "");
+                infowindow.open(map);
+            });
 
-        marker.addListener('click', () => {
-            // clickHandler(index, place)
-            // setMapState((prev) => map)
-            map.panTo({ lat: place.Latitude, lng: place.Longitude })
-            setResults((prev) => prev !== null && prev.map((v, i) => ({
-                ...v, selected: (i === index ? true : false)
-            })))
-            setOpenDetail(true)
-        })
+            marker.addListener('click', () => {
+                map.panTo(place.geometry.location)
+                setResults((prev) => prev !== null && prev.map((v, i) => ({
+                    ...v, selected: (i === index ? true : false)
+                })))
+                setOpenDetail(true)
+            })
 
-        // if (index == 0) {
-        //     google.maps.event.trigger(marker, 'click');
-        // }
+            return marker;
 
-        return marker;
+        } else {
+            console.log('place geometry is null = regist')
+            const marker = new google.maps.Marker({
+                map: map,
+                position: { lat: place.Latitude, lng: place.Longitude },
+                label: numToSSColumn(index + 1),
+            });
+
+            google.maps.event.addListener(marker, "click", () => {
+                infowindow.setContent(place.Name || "");
+                infowindow.open(map);
+            });
+
+            marker.addListener('click', () => {
+                map.panTo({ lat: place.Latitude, lng: place.Longitude })
+                setResults((prev) => prev !== null && prev.map((v, i) => ({
+                    ...v, selected: (i === index ? true : false)
+                })))
+                setOpenDetail(true)
+            })
+
+            return marker;
+        }
+
+
     }
 
     function numToSSColumn(num) {
@@ -405,52 +308,30 @@ const AdminMap = (props) => {
         return s || undefined;
     }
 
-    const searchFiltering = (tmpResult) => {
-        console.log('in searchFiltering', tmpResult)
-        // db
-        // search.filter(~~~)
+    const searchFilteringFunc = (regist, search) => {
+        const tmpS = search.map((item => (({ place_id, name, rating, vicinity, ...item }) => ({ id: place_id, name, rating, vicinity, ...item }))(item)))
+        const tmpR = regist.map((item) => item.PlaceID)
+        let update = tmpS.filter(x => !tmpR.includes(x.id))
 
-        LS2FindRestaurant().then(async (db_results) => {
-            console.log(db_results)
-            const recommend = (db_results[0].status && db_results[0].status === 'success') ? db_results[0].data.map((item) => item.PlaceID) : []
-            const notRecommend = (db_results[1].status && db_results[1].status === 'success') ? db_results[1].data.map((item) => item.PlaceID) : []
+        
 
-            return await recommend.concat(notRecommend);
-        }).then((totalRestaurant) => {
-            console.log('totalRes', totalRestaurant)
-            console.log('tmpResult?', tmpResult)
-            // setSearch((prev) => tmpResult.filter(x => !totalRestaurant.includes(x.place_id)))
-            return tmpResult.filter(x => !totalRestaurant.includes(x.place_id))
-        })
-            .then((updateRestaurant) => {
-                console.log('updateRestaurnt', updateRestaurant)
-                if (updateRestaurant.length !== 0) {
+        if (update.length != updateMarkers.length && updateMarkers.length == 0) {
+            console.log('searchFilterginFunc')
+            let tAllMarkers = [];
+            for (let i = 0; i < update.length; i++) {
+                console.log('createMarker!!', i)
+                var marker = createMarker(update[i], i)
+                tAllMarkers.push(marker)
+            }
+            setUpdateMarkers((prev) => tAllMarkers)
+        }
 
-                    let tAllMarkers = [];
-                    console.log('after filter search', updateRestaurant)
-
-                    for (let i = 0; i < updateRestaurant.length; i++) {
-                        var marker = createMarker(updateRestaurant[i], i);
-                        tAllMarkers.push(marker);
-                    }
-
-                    console.log('in createMarker', tAllMarkers)
-                    setMarkers(tAllMarkers);
-                    console.log('marker?', markers);
-                    setSearch((prev) => updateRestaurant)
-
-                    // if (search[0].geometry != null && search[0].geometry.location != null) {
-                    //     map.setCenter(search[0].geometry.location);
-                    // }
-                }
-            })
-
-        setLoading(false);
+        return update;
     }
 
     const handleUpdate = (selectionModel) => {
         console.log('click update btn')
-        console.log('markers?', markers)
+        console.log('markers?', updateMarkers)
 
         if (selectionModel) {
             let responseList = [];
@@ -484,190 +365,78 @@ const AdminMap = (props) => {
                                             Object.assign(res, {
                                                 address: place.formatted_address,
                                                 phone: place.formatted_phone_number,
-                                                distance: Math.round(haversine([res.geometry.location.lng(), res.geometry.location.lat()], [center.lng, center.lat]))
+                                                distance: Math.round(haversine([res.geometry.location.lng(), res.geometry.location.lat()], [center.Longitude, center.Latitude]))
                                             }))
                                     }
                                 })
                             }, 400 * (x))
                         })(i)
-
-
-
-                        // putRestaurant(res).then((result) => {
-                        //     // console.log(result)
-                        //     // if (result.status === 'test_success') {
-                        //     //     indexList.push(lastIndex);
-                        //     // }
-                        //     // responseList.push(result);
-                        // })
                     }
                 })
             }
 
             updateCall(responseList, indexList);
 
-            const tmp = search.slice();
-            const tmpMarker = markers.slice();
-            // markers.forEach((marker) => {
-            //     marker.setMap(null);
-            // });
+            const tmp = searchFilteringFunc(regist, search);
+            const tmpMarker = updateMarkers.slice();
 
+            console.log('selection model',selectionModel)
+            console.log('tmp',tmp)
             let tAllMarkers = [];
             let i = 0;
-            markers.map((marker, index) => {
-                if (selectionModel.includes(tmp[index].place_id)) {
+            updateMarkers.map((marker, index) => {
+                if (selectionModel.includes(tmp[index].id)) {
+                    console.log('delete', index)
                     marker.setMap(null);
                 } else {
+                    console.log('remain', index)
                     tAllMarkers.push(tmpMarker[index])
                 }
             })
-            setMarkers(tAllMarkers)
-
-            // tmp.filter(x => !selectionModel.includes(x.place_id))
-
-            // let tAllMarkers = [];
-            // for (let i = 0; i < tmp.length; i++) {
-            //     var marker = createMarker(tmp[i], i);
-            //     tAllMarkers.push(marker);
-            // }
-            // setMarkers(tAllMarkers)
-            // markers = tmp.filter(x => !selectionModel.includes(x.place_id))
+            setUpdateMarkers(tAllMarkers)
 
             setSearch((prev) => prev.filter(x => !selectionModel.includes(x.place_id)))
-
-
-
-
-            // console.log('responseList',responseList, responseList.length);
-            // console.log('indexList',indexList, indexList.length);
-
-            // setSearch((prev) => {
-            //     var tmp = prev.slice();
-            //     console.log('indexlist length', indexList.length, indexList)
-            //     console.log('init tmp', tmp)
-
-            //     for (let i=0; i< indexList.length; i++) {
-            //         tmp.splice(indexList[i],1)
-            //         console.log('middle tmp', tmp, i);
-            //     }
-
-            //     console.log('prev',tmp)
-            //     return tmp
-            // })
         }
     }
 
-
-
-
-    // const initAutoComplete  = () => {
-    //     const searchInputEl = document.getElementById('input');
-    //     const autoComplete = new google.maps.places.Autocomplete(searchInputEl, {
-    //         types: ['geocode'],
-    //         fields: ['place_id', 'formatted_address', 'geometry.location', 'name']
-    //     })
-
-    //     autoComplete.bindTo('bounds', map);
-    //     autoComplete.addListener('place_changed', () => {
-    //         const placeResult = autoComplete.getPlace();
-    //         console.log('in intiAC result : ',placeResult)
-    //         // setInput(placeResult.formatted_address)
-
-    //         console.log(placeResult.geometry.location.lat(), placeResult.geometry.location.lng())
-    //         console.log(map)
-
-    //         const marker = new google.maps.Marker({
-    //             map: map,
-    //             position: placeResult.geometry.location,
-    //         });
-
-    //         map.panTo(placeResult.geometry.location)
-    //     })
-    // }
-
-    // const initGeocode = () => {
-    //     geocoder = new google.maps.Geocoder();
-
-    //     const geocodeSearch = (query) => {
-    //         console.log('in geocode search!', query)
-    //         if (!query) {
-    //             return;
-    //         }
-
-    //         const handleResult = (geocodeResult) => {
-    //             return;
-    //         }
-
-    //         console.log(map)
-
-    //         // const request = {address: "Hell's Kitchen, 맨해튼 뉴욕 미국", bounds: map.getBounds()};
-    //         const request = {address: query, bounds: map.getBounds()};
-    //         geocoder.geocode(request, (results, status) => {
-    //             console.log(results, status)
-    //             if (status === 'OK') {
-    //                 if (results.length > 0) {
-    //                     const result = results[0]
-    //                     handleResult(result)
-    //                 }
-    //             }
-    //         })
-    //     }
-
-    //     const searchButtonEl = document.getElementById('searchBtn')
-    //         .addEventListener('click', () => {
-    //             console.log('search btn click!!')
-    //             geocodeSearch(input.trim())
-    //         })
-    // }
-
     useEffect(() => {
         initMap()
-        // initSearchBox();
 
+        // initSearchBox();
     }, [])
 
     useEffect(() => {
         console.log('search changed', search, search.length)
-
-        // if (!loading) {
-        //     console.log('loading is false')
-
-        //     if (search.length > 0) {
-        //         console.log('markers length', markers, markers.length)
-        //         for (let i=0; i< markers.length; i++) {
-        //             markers[i].setMap(null);
-        //         }
-
-        //         // let tAllMarkers = [];
-        //         // for (let i = 0; i < search.length; i++) {
-        //         //     var marker = createMarker(search[i], i);
-        //         //     tAllMarkers.push(marker);
-        //         // }
-
-        //         // console.log('in createMarker', tAllMarkers)
-        //         // markers = tAllMarkers;
-        //     }
-        // }
-
-        // if (search.length > 0) {
-        //     let tAllMarkers = [];
-        //     for (let i = 0; i < search.length; i++) {
-        //         var marker = createMarker(search[i], i);
-        //         tAllMarkers.push(marker);
-        //     }
-
-        //     console.log('in createMarker', tAllMarkers)
-        //     // setMarkers((prev) => tAllMarkers);
-        // }
-
     }, [search])
 
-    // useEffect(() => {
-    //     console.log('marker changed', markers)
-    // }, [markers])
-    // useEffect(() => {
-    //     console.log('loading changed', loading)
-    // }, [loading])
+    useEffect(() => {
+        console.log('regist changed', regist)
+    }, [regist])
+
+    useEffect(() => {
+        console.log('tabValue change', tabValue)
+        console.log('\tmap', map)
+        console.log('\tmap', mapState)
+        console.log('\tregisterMarker', registMarkers)
+        console.log('\tupdateMarker', updateMarkers)
+
+        if (tabValue == '1') {
+            for (let i = 0; i < updateMarkers.length; i++) {
+                updateMarkers[i].setMap(mapState);
+            }
+            for (let j = 0; j < registMarkers.length; j++) {
+                registMarkers[j].setMap(null);
+            }
+
+        } else {
+            for (let i = 0; i < updateMarkers.length; i++) {
+                updateMarkers[i].setMap(null);
+            }
+            for (let j = 0; j < registMarkers.length; j++) {
+                registMarkers[j].setMap(mapState);
+            }
+        }
+    }, [tabValue])
 
 
 
@@ -679,8 +448,6 @@ const AdminMap = (props) => {
                         id='input'
                         className={classes.input}
                         placeholder="Search Google Maps"
-                    // value={input}
-                    // onChange={handleInputChange}
                     />
                     <IconButton onClick={handleClear} className={classes.iconButton}>
                         <ClearIcon />
@@ -691,20 +458,43 @@ const AdminMap = (props) => {
                     </IconButton>
                 </Paper>
 
-                {/* <Button variant="contained" color="primary">
-                    {loading && <CircularProgress color="secondary" />}
-                    {loading ? 'Loading...' : `Update All!! (${search.length})`}
-                </Button> */}
+                <TabContext value={tabValue}>
+                    <AppBar position="static">
+                        <TabList onChange={handleTabChange} >
+                            <Tab label="Registered" value="0" />
+                            <Tab label="Update" value="1" />
 
-                <UpdateList
-                    handleUpdate={handleUpdate}
-                    markers={markers}
-                    loading={loading}
-                    rows={loading ? []
-                        : search.map((item => (({ place_id, name, rating, vicinity, ...item }) => ({ id: place_id, name, rating, vicinity, ...item }))(item)))
-                    }
-                >
-                </UpdateList>
+                        </TabList>
+                    </AppBar>
+
+                    <TabPanel value="0" className={classes.tabPanel}>
+                        <RegistList
+                            markers={registMarkers}
+                            loading={loading}
+                            rows={loading ? []
+                                : regist.map((item => (({ PlaceID, Name, TotalRate, Address, ...item }) => ({ id: PlaceID, name: Name, rating: TotalRate, vicinity: Address, ...item }))(item)))
+                            }
+                        />
+                    </TabPanel>
+                    <TabPanel value="1" className={classes.tabPanel}>
+                        {/* update */}
+                        <UpdateList
+                            updateList={loading ? [] : searchFilteringFunc(regist, search)}
+                            handleUpdate={handleUpdate}
+                            markers={updateMarkers}
+                            loading={loading}
+                            search={loading ? []
+                                : search.map((item => (({ place_id, name, rating, vicinity, ...item }) => ({ id: place_id, name, rating, vicinity, ...item }))(item)))
+                            }
+                            regist={loading ? []
+                                : regist.map((item) => item.PlaceID)
+                            }
+                        />
+                    </TabPanel>
+
+                </TabContext>
+
+
             </div>
             <div id="map" className={center !== null ? classes.mapOpened : classes.mapNotOpened}>
                 test
@@ -731,7 +521,7 @@ const AdminMap = (props) => {
 
 const UpdateList = (props) => {
 
-    const { loading, rows, markers } = props;
+    const { loading, search, regist, updateList } = props;
     const [selectionModel, setSelectionModel] = useState([]);
 
     const columns = [
@@ -739,22 +529,6 @@ const UpdateList = (props) => {
         { field: 'rating', headerName: 'Rating', width: '75' },
         { field: 'vicinity', headerName: 'Vicinity', width: '125' }
     ]
-
-    console.log('rows', rows)
-    console.log('props markers?', markers)
-
-
-    // const dumiRows = [
-    //     { id: 1, name: 'Snow', rating: 'Jon', vicinity: 35, test: 't' },
-    //     { id: 2, name: 'Lannister', rating: 'Cersei', vicinity: 42, test: 't' },
-    //     { id: 3, name: 'Lannister', rating: 'Jaime', vicinity: 45, test: 't' },
-    //     { id: 4, name: 'Stark', rating: 'Arya', vicinity: 16, test: 't' },
-    //     { id: 5, name: 'Targaryen', rating: 'Daenerys', vicinity: null, test: 't' },
-    //     { id: 6, name: 'Melisandre', rating: null, vicinity: 150, test: 't' },
-    //     { id: 7, name: 'Clifford', rating: 'Ferrara', vicinity: 44, test: 't' },
-    //     { id: 8, name: 'Frances', rating: 'Rossini', vicinity: 36, test: 't' },
-    //     { id: 9, name: 'Roxie', rating: 'Harvey', vicinity: 65, test: 't' },
-    // ];
 
     useEffect(() => {
         console.log('selectionModel changed', selectionModel)
@@ -767,7 +541,7 @@ const UpdateList = (props) => {
     return (
         <DataGrid
             pageSize={10}
-            rows={rows}
+            rows={updateList}
             loading={loading}
             columns={columns}
             checkboxSelection
@@ -797,7 +571,7 @@ const UpdateListToolbar = (props) => {
             {numSelected > 0 ? (
                 <Typography className={classes.UpdateListToolBarTitle}>{numSelected} selected</Typography>
             ) : (
-                <Typography className={classes.UpdateListToolBarTitle}>Updateable List</Typography>
+                <Typography className={classes.UpdateListToolBarTitle}>Restaurant Updateable List</Typography>
             )}
 
             {numSelected > 0 && (
@@ -813,4 +587,63 @@ const UpdateListToolbar = (props) => {
     )
 }
 
-export default AdminMap;
+
+const RegistList = (props) => {
+
+    const { loading, rows, markers } = props;
+    const [selectionModel, setSelectionModel] = useState([]);
+
+    const columns = [
+        { field: 'name', headerName: 'Name', width: '150' },
+        { field: 'rating', headerName: 'Rating', width: '75' },
+        { field: 'vicinity', headerName: 'Vicinity', width: '125' }
+    ]
+
+    return (
+        <DataGrid
+            pageSize={10}
+            rows={rows}
+            loading={loading}
+            columns={columns}
+            // checkboxSelection
+
+            onSelectionModelChange={(newSelection) => {
+                setSelectionModel(newSelection);
+            }}
+            selectionModel={selectionModel}
+
+            components={{ Toolbar: RegistListToolbar }}
+            componentsProps={{ toolbar: { selectionModel: selectionModel } }}
+        >
+
+        </DataGrid>
+
+    )
+}
+
+const RegistListToolbar = (props) => {
+    const classes = useStyles();
+    const { selectionModel } = props;
+    const numSelected = selectionModel ? selectionModel.length : 0;
+
+    return (
+        <Toolbar>
+            {numSelected > 0 ? (
+                <Typography className={classes.UpdateListToolBarTitle}>{numSelected} selected</Typography>
+            ) : (
+                <Typography className={classes.UpdateListToolBarTitle}>Restaurant Regist List</Typography>
+            )}
+
+            {numSelected > 0 && (
+                <Tooltip title="Regist">
+                    <IconButton>
+                        <UpdateIcon />
+                    </IconButton>
+                </Tooltip>
+            )}
+
+        </Toolbar>
+
+    )
+}
+export default AdminRestaurant;
