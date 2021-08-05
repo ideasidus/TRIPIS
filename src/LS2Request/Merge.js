@@ -37,3 +37,69 @@ export const mergeRestaurant = (obj) => {
 
     return response;
 }
+
+export const recommendRestaurant = (obj) => {
+    console.log("mergeData : ", obj)
+    let response = new Promise((resolve, reject) => {
+        new LS2Request().send({
+            service: 'com.webos.service.db',
+            method: 'merge',
+            parameters: {
+                "query": {
+                    "from": "com.trip.info:1",
+                    "where": [{
+                        "prop": "PlaceID",
+                        "op": "=",
+                        "val": obj
+                    }]
+                },
+                "props":{
+                    "HostRecommendation":true,
+                }
+            },
+            onSuccess: (res) => {
+                console.log("success", res)
+                resolve({ status: 'success' })
+            },
+            onFailure: (res) => {
+                console.log("fail", res)
+                resolve({ status: 'fail' })
+            }
+        })
+    })
+
+    return response;
+}
+
+export const recommendAttraction = (obj) => {
+    console.log("mergeData : ", obj)
+    let response = new Promise((resolve, reject) => {
+        new LS2Request().send({
+            service: 'com.webos.service.db',
+            method: 'merge',
+            parameters: {
+                "query": {
+                    "from": "com.trip.info:2",
+                    "where": [{
+                        "prop": "PlaceID",
+                        "op": "=",
+                        "val": obj
+                    }]
+                },
+                "props":{
+                    "HostRecommendation":true,
+                }
+            },
+            onSuccess: (res) => {
+                console.log("success", res)
+                resolve({ status: 'success' })
+            },
+            onFailure: (res) => {
+                console.log("fail", res)
+                resolve({ status: 'fail' })
+            }
+        })
+    })
+
+    return response;
+}

@@ -14,6 +14,7 @@ import { DetailItem } from '../map';
 
 import { findAttraction as LS2FindAttraction, findCenter } from '../../LS2Request/Find';
 import { putAttraction } from '../../LS2Request/Put';
+import { recommendAttraction } from '../../LS2Request/Merge';
 import { useHistory } from 'react-router-dom';
 
 import haversine from 'haversine-distance'
@@ -26,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     },
 
     listSection: {
-        width: '20vw', minWidth: 400, height: '100vh', overflowY: 'auto',
+        width: '30vw', minWidth: 400, height: '100vh', overflowY: 'auto',
     },
     inputPaper: {
         display: 'flex', alignItems: 'center',
@@ -49,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     },
     mapNotOpened: {
         height: '100vh',
-        width: '80vw',
+        width: '67vw',
     },
     detailItem: {
         height: '100vh',
@@ -475,7 +476,16 @@ const AdminAttraction = (props) => {
             setSearch((prev) => prev.filter(x => !selectionModel.includes(x.place_id)))
         }
     }
+    const handleRecommend = (selectionModel) => {
+        console.log('click update btn')
+        console.log('markers?', updateMarkers)
 
+        if (selectionModel) {
+            selectionModel.map((item)=>{
+                recommendAttraction(item)
+            })
+        }
+    }
     useEffect(() => {
         initMap()
 
@@ -547,6 +557,7 @@ const AdminAttraction = (props) => {
                     <TabPanel value="0" className={classes.tabPanel}>
                         <RegistList
                             markers={registMarkers}
+                            handleRecommend={handleRecommend}
                             loading={loading}
                             rows={loading ? []
                                 : regist.map((item => (({ PlaceID, Name, TotalRate, Address, ...item }) => ({ id: PlaceID, name: Name, rating: TotalRate, vicinity: Address, ...item }))(item)))
@@ -573,12 +584,13 @@ const AdminAttraction = (props) => {
 
 
             </div>
-            <div id="map" className={center !== null ? classes.mapOpened : classes.mapNotOpened}>
+            {/* <div id="map" className={center !== null ? classes.mapOpened : classes.mapNotOpened}> */}
+            <div id="map" className={classes.mapNotOpened}>
                 test
             </div>
 
 
-            <div className={center !== null ? classes.detailItemOpened : classes.detailItemNotOpened}>
+            {/* <div className={center !== null ? classes.detailItemOpened : classes.detailItemNotOpened}>
                 <DetailItem
                     name="피자에땅 경대점"
                     address="Daeheyon 1(il)-dong, Buk-gu, Daegu, South Korea"
@@ -591,7 +603,7 @@ const AdminAttraction = (props) => {
                     clickBtn={() => { console.log('click recommend!') }}
                     reviews={[]}
                 />
-            </div>
+            </div> */}
         </div>
     )
 }
@@ -603,8 +615,9 @@ const UpdateList = (props) => {
 
     const columns = [
         { field: 'name', headerName: 'Name', width: '150' },
-        { field: 'rating', headerName: 'Rating', width: '75' },
-        { field: 'vicinity', headerName: 'Vicinity', width: '125' }
+        { field: 'rating', headerName: 'Rating', width: '124' },
+        { field: 'vicinity', headerName: 'Vicinity', width: '300' },
+        // { field: 'recommend', headerName: 'Recommend', width: '100' }
     ]
 
 
@@ -685,17 +698,20 @@ const RegistList = (props) => {
 
     const columns = [
         { field: 'name', headerName: 'Name', width: '150' },
-        { field: 'rating', headerName: 'Rating', width: '75' },
-        { field: 'vicinity', headerName: 'Vicinity', width: '125' }
+        { field: 'rating', headerName: 'Rating', width: '124' },
+        { field: 'vicinity', headerName: 'Vicinity', width: '300' },
     ]
 
+    const handleRecommend = () => {
+        props.handleRecommend(selectionModel)
+    }
     return (
         <DataGrid
             pageSize={10}
             rows={rows}
             loading={loading}
             columns={columns}
-            // checkboxSelection
+            checkboxSelection
 
             onSelectionModelChange={(newSelection) => {
                 setSelectionModel(newSelection);
@@ -703,7 +719,7 @@ const RegistList = (props) => {
             selectionModel={selectionModel}
 
             components={{ Toolbar: RegistListToolbar }}
-            componentsProps={{ toolbar: { selectionModel: selectionModel } }}
+            componentsProps={{ toolbar: { selectionModel: selectionModel, handleRecommend: handleRecommend} }}
         >
 
         </DataGrid>
@@ -713,7 +729,7 @@ const RegistList = (props) => {
 
 const RegistListToolbar = (props) => {
     const classes = useStyles();
-    const { selectionModel } = props;
+    const { selectionModel, handleRecommend } = props;
     const numSelected = selectionModel ? selectionModel.length : 0;
 
     return (
@@ -726,7 +742,7 @@ const RegistListToolbar = (props) => {
 
             {numSelected > 0 && (
                 <Tooltip title="Regist">
-                    <IconButton>
+                    <IconButton onClick={handleRecommend}>
                         <UpdateIcon />
                     </IconButton>
                 </Tooltip>
